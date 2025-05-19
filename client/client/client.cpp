@@ -12,8 +12,8 @@ public:
 	int frame;
 
 	Player() {
-		x = 4;
-		y = 4;
+		x = 8;
+		y = 8;
 		frame = 0;
 	}
 };
@@ -44,19 +44,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 }
 
 HFONT hFont = nullptr;
-CImage Soldier, Background;
+CImage Ninja, Background;
 CImage backBuffer;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	float width = 800 / 8.0f; // 보드의 각 칸 크기
+	float width = 800 / 16.0f; // 보드의 각 칸 크기
 	HDC hDC;
 
 	switch (uMsg) {
 	case WM_CREATE: {
-		HRESULT sol = Soldier.Load(L"img/Soldier.png");
-		if (FAILED(sol)) MessageBox(0, L"Soldier.png 로드 실패!", 0, 0);
+		HRESULT sol = Ninja.Load(L"img/Ninja.png");
 		HRESULT bgroung = Background.Load(L"img/Grass2.png");
-		if (FAILED(bgroung)) MessageBox(0, L"Grass.png 로드 실패!", 0, 0);
 
 		backBuffer.Create(800, 800, 32);
 
@@ -81,8 +79,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		SetBkMode(memDC, TRANSPARENT);
 
 		// 말 그리기
-		Soldier.Draw(memDC, players.x * width, players.y * width,
-			width, width, players.frame * 100, 0, 100, 100);
+		Ninja.Draw(memDC, players.x * width, players.y * width,
+			width, width, players.frame * 50, 0, 100, 100);
 		WCHAR szId[16];
 		wsprintf(szId, L"%d", 1);
 		TextOut(memDC, players.x * width, players.y * width - 20,
@@ -111,7 +109,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_TIMER:
 	{
 		if (wParam == 1) {
-			players.frame = (players.frame + 1) % 6;
+			// players.frame = (players.frame + 1) % 4;
 		}
 		InvalidateRect(hWnd, NULL, FALSE);
 		break;
@@ -119,7 +117,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_DESTROY:
 	{
 		if (!Background.IsNull()) Background.Destroy();
-		if (!Soldier.IsNull()) Soldier.Destroy();
+		if (!Ninja.IsNull()) Ninja.Destroy();
 		if (!backBuffer.IsNull()) backBuffer.Destroy();
 
 		if (hFont) { DeleteObject(hFont); hFont = nullptr; }
