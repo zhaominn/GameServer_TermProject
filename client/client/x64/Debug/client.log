@@ -1,9 +1,9 @@
 ﻿  client.cpp
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(43,12): warning C4244: 'return': 'WPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(83,11): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(83,4): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(82,50): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(82,31): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(86,55): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(86,28): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(53,12): warning C4244: 'return': 'WPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(93,11): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(93,4): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(92,50): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(92,31): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(96,55): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(96,28): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   client.vcxproj -> C:\Users\somin\OneDrive\GameServer_TermProject\client\x64\Debug\client.exe

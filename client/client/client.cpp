@@ -5,10 +5,20 @@
 #include <iostream>
 #include <unordered_map>
 
+bool key[4] = { false, false, false, false };
+constexpr char DOWN = 0;
+constexpr char UP = 1;
+constexpr char LEFT = 2;
+constexpr char RIGHT = 3;
+
+constexpr unsigned short MAP_H = 16;
+constexpr unsigned short MAP_W = 16;
+
 class Player {
 public:
 	short x;
 	short y;
+	int dir;
 	int frame;
 
 	Player() {
@@ -80,7 +90,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 		// 말 그리기
 		Ninja.Draw(memDC, players.x * width, players.y * width,
-			width, width, players.frame * 50, 0, 100, 100);
+			width, width, players.dir * 100, players.frame * 100, 100, 100);
 		WCHAR szId[16];
 		wsprintf(szId, L"%d", 1);
 		TextOut(memDC, players.x * width, players.y * width - 20,
@@ -96,20 +106,40 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_KEYDOWN:
 	{
 		switch (wParam) {
-		case VK_UP: case 'w': case'W': --players.y; break;
-		case VK_LEFT: case'a': case'A': --players.x; break;
-		case VK_DOWN: case's': case'S': ++players.y; break;
-		case VK_RIGHT: case'd': case'D': ++players.x; break;
+		case VK_UP: case 'w': case'W':	 key[0] = true; players.dir = UP; break;
+		case VK_LEFT: case'a': case'A':	 key[1] = true; players.dir = LEFT; break;
+		case VK_DOWN: case's': case'S':	 key[2] = true; players.dir = DOWN; break;
+		case VK_RIGHT: case'd': case'D': key[3] = true; players.dir = RIGHT; break;
 		case 'Q': PostQuitMessage(0); break;
 		default: break;
 		}
-		InvalidateRect(hWnd, NULL, FALSE);
+		break;
+	}
+	case WM_KEYUP:
+	{
+		switch (wParam) {
+		case VK_UP: case 'w': case'W':	 key[0] = false; break;
+		case VK_LEFT: case'a': case'A':	 key[1] = false; break;
+		case VK_DOWN: case's': case'S':	 key[2] = false; break;
+		case VK_RIGHT: case'd': case'D': key[3] = false; break;
+		case 'Q': PostQuitMessage(0); break;
+		default: break;
+		}
 		break;
 	}
 	case WM_TIMER:
 	{
 		if (wParam == 1) {
-			// players.frame = (players.frame + 1) % 4;
+			bool moved = false;
+			if (key[0]) { --players.y; players.dir = UP; moved = true; }
+			if (key[1]) { --players.x; players.dir = LEFT; moved = true; }
+			if (key[2]) { ++players.y; players.dir = DOWN; moved = true; }
+			if (key[3]) { ++players.x; players.dir = RIGHT; moved = true; }
+			// 프레임 증가 (한 번에 하나 방향만 누른다고 가정)
+			if (moved)
+				players.frame = (players.frame + 1) % 4;
+			else
+				players.frame = 0;
 		}
 		InvalidateRect(hWnd, NULL, FALSE);
 		break;
