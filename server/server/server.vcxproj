@@ -125,6 +125,9 @@
   <ItemGroup>
     <ClInclude Include="protocol.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="server.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

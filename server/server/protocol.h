@@ -1,11 +1,10 @@
 #pragma once
-#pragma once
 
 constexpr short GAME_PORT = 3000;
 
 constexpr short MAX_CHAT_LENGTH = 255;
 
-constexpr int  MAX_USER = 10000;
+constexpr int  MAX_USER = 20000;
 constexpr int  NUM_MONSTER = 200000;
 
 constexpr char S2C_P_AVATAR_INFO = 1;
@@ -28,10 +27,14 @@ constexpr char MAX_ID_LENGTH = 20;
 constexpr char MOVE_UP = 1;
 constexpr char MOVE_DOWN = 2;
 constexpr char MOVE_LEFT = 3;
-constexpr char MOVE_RIGHT = 4;
+constexpr char MOVE_RIGHT = 4; 
+constexpr unsigned short MOVE_DELAY_MS = 400; // 1초로조정해놔야하늬니라
 
 constexpr unsigned short MAP_HEIGHT = 2000;
 constexpr unsigned short MAP_WIDTH = 2000;
+constexpr unsigned short TILE_SIZE = 100;
+constexpr unsigned int WINDOW_SIZE = 900;
+constexpr int WINDOW_CENTER = 4;
 
 #pragma pack (push, 1)
 
