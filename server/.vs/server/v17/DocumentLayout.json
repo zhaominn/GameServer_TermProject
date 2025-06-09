@@ -5,6 +5,13 @@
     {
       "AbsoluteMoniker": "D:0:0:{220E51AF-436D-421C-AF01-D79F78676274}|server\\server.vcxproj|C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\server.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{220E51AF-436D-421C-AF01-D79F78676274}|server\\server.vcxproj|solutionrelative:server\\server.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\crt\\src\\vcruntime\\delete_scalar.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{220E51AF-436D-421C-AF01-D79F78676274}|server\\server.vcxproj|C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\protocol.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{220E51AF-436D-421C-AF01-D79F78676274}|server\\server.vcxproj|solutionrelative:server\\protocol.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,8 +21,33 @@
       "DocumentGroups": [
         {
           "DockedWidth": 184,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 2,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "delete_scalar.cpp",
+              "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\crt\\src\\vcruntime\\delete_scalar.cpp",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\crt\\src\\vcruntime\\delete_scalar.cpp",
+              "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\crt\\src\\vcruntime\\delete_scalar.cpp",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\crt\\src\\vcruntime\\delete_scalar.cpp",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAACAAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-06-09T06:37:06.018Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "protocol.h",
+              "DocumentMoniker": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\protocol.h",
+              "RelativeDocumentMoniker": "server\\protocol.h",
+              "ToolTip": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\protocol.h",
+              "RelativeToolTip": "server\\protocol.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-06-08T16:28:22.834Z"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -24,7 +56,7 @@
               "RelativeDocumentMoniker": "server\\server.cpp",
               "ToolTip": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\server.cpp",
               "RelativeToolTip": "server\\server.cpp",
-              "ViewState": "AgIAANIAAAAAAAAAAAAAANgAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAEoAAAAAAAAAAAAQwE8AAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-06-08T08:28:12.345Z",
               "EditorCaption": ""

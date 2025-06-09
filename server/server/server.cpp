@@ -1,8 +1,11 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <unordered_map>
 #include <WS2tcpip.h>
 #include <MSWSock.h>
 
+#include <thread>
+#include <vector>
+#include <mutex>
 using namespace std;
 
 #include "protocol.h"
@@ -27,7 +30,6 @@ public:
 		wsabuf[0].buf = reinterpret_cast<CHAR*>(packet);
 		wsabuf[0].len = sizeof(packet);
 	}
-
 };
 
 class SESSION;
@@ -45,12 +47,13 @@ public:
 	int   exp;
 
 	SOCKET socket;
-	EXP_OVER recv_over{ RECV };
+	// EXP_OVER recv_over{ RECV };
 	unsigned char remained;
+	unsigned char recv_buffer[MAX_CHAT_LENGTH];
 
 public:
 	SESSION() {
-		std::cout << "DEFAULT SESSION »ý¼ºÀÚ È£Ãâ\n";
+		std::cout << "DEFAULT SESSION ìƒì„±ìž í˜¸ì¶œ\n";
 		exit(-1);
 	}
 
@@ -75,12 +78,15 @@ public:
 
 	void recv()
 	{
+		auto* recv_over = new EXP_OVER(RECV);
 		DWORD recv_flag = 0;
-		ZeroMemory(&recv_over.wsa_over, sizeof(recv_over.wsa_over));
-		recv_over.wsabuf[0].buf = reinterpret_cast<CHAR*>(recv_over.packet + remained);
-		recv_over.wsabuf->len = sizeof(recv_over.packet) - remained;
+		ZeroMemory(&recv_over->wsa_over, sizeof(recv_over->wsa_over));
+		if (remained > 0)
+			memcpy(recv_over->packet, recv_buffer, remained);
+		recv_over->wsabuf[0].buf = reinterpret_cast<CHAR*>(recv_over->packet + remained);
+		recv_over->wsabuf[0].len = sizeof(recv_over->packet) - remained;
 
-		WSARecv(socket, recv_over.wsabuf, 1, NULL, &recv_flag, &recv_over.wsa_over, NULL);
+		WSARecv(socket, recv_over->wsabuf, 1, NULL, &recv_flag, &recv_over->wsa_over, NULL);
 	}
 
 	void send_packet(void* packet)
@@ -127,7 +133,7 @@ public:
 			name = packet->name;
 			x = rand() % MAP_WIDTH;
 			y = rand() % MAP_HEIGHT;
-			printf("[DEBUG] Å¬¶óÀÌ¾ðÆ® ·Î±×ÀÎ!! (id=%lld, name=%s)\n", id, name.c_str());
+			printf("[DEBUG] í´ë¼ì´ì–¸íŠ¸ ë¡œê·¸ì¸!! (id=%lld, name=%s)\n", id, name.c_str());
 			send_player_info();
 
 			sc_packet_enter enter_packet;
@@ -153,7 +159,7 @@ public:
 					strcpy_s(character_enter_packet.name, c.second->name.c_str());
 					character_enter_packet.o_type = 0;
 					character_enter_packet.x = c.second->x;
-					character_enter_packet.y =c.second->y;
+					character_enter_packet.y = c.second->y;
 					send_packet(&character_enter_packet);
 				}
 			}
@@ -188,18 +194,114 @@ public:
 	}
 };
 
+std::atomic<long long> global_new_id = 0;
+
+SOCKET s_socket;
+mutex m_characters;
+
+void work_thread(HANDLE hIOCP) {
+	while (true) {
+		DWORD io_size;
+		WSAOVERLAPPED* o;
+		ULONG_PTR key;
+		BOOL ret = GetQueuedCompletionStatus(hIOCP, &io_size, &key, &o, INFINITE);
+		if (!o) continue;
+
+		EXP_OVER* eo = reinterpret_cast<EXP_OVER*>(o);
+
+		std::shared_ptr<SESSION> character;
+		{
+			std::lock_guard<std::mutex> lock(m_characters);
+
+			if ((eo->io_type == RECV || eo->io_type == SEND) && (0 == io_size)) {
+				if (Characters.count(key) != 0)
+					Characters.erase(key);
+				delete eo;
+				continue;
+			}
+		}
+
+		switch (eo->io_type) {
+		case ACCEPT: {
+			long long session_id = global_new_id++;
+			CreateIoCompletionPort(reinterpret_cast<HANDLE>(eo->accept_socket), hIOCP, session_id, 0);
+
+			{
+				std::lock_guard<std::mutex> lock(m_characters);
+				Characters.emplace(session_id, std::make_shared<SESSION>(session_id, eo->accept_socket));
+			}
+
+			delete eo;
+
+			auto* next_accept = new EXP_OVER(ACCEPT);
+			SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+			if (c_socket == INVALID_SOCKET) {
+				printf("WSASocket failed for accept: %d\n", WSAGetLastError());
+				delete next_accept;
+				break;
+			}
+			BOOL ok = AcceptEx(s_socket, c_socket, next_accept->packet, 0,
+				sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16,
+				NULL, reinterpret_cast<LPWSAOVERLAPPED>(next_accept));
+			if (!ok && WSAGetLastError() != WSA_IO_PENDING) {
+				printf("AcceptEx failed: %d\n", WSAGetLastError());
+				delete next_accept;
+				closesocket(c_socket);
+				break;
+			}
+
+			break;
+		}
+		case SEND: {
+			delete eo;
+			break;
+		}
+		case RECV: {
+			{
+				std::lock_guard<std::mutex> lock(m_characters);
+				auto it = Characters.find(key);
+				if (it == Characters.end()) {
+					delete eo;
+					break;
+				}
+				character = it->second;
+			}
+			unsigned char* p = eo->packet;
+			int data_size = io_size + character->remained;
+			while (p < eo->packet + data_size) {
+				unsigned char packet_size = *p;
+				if (p + packet_size > eo->packet + data_size)
+					break;
+				character->process_packet(p);
+				p = p + packet_size;
+			}
+			if (p < eo->packet + data_size) {
+				character->remained = static_cast<unsigned char>(eo->packet + data_size - p);
+				memcpy(character->recv_buffer, p, character->remained); // â­ ì´ ì¤„ë§Œ ë°”ê¿¨ìŒ!
+			}
+			else {
+				character->remained = 0;
+			}
+			character->recv();
+			delete eo;
+			break;
+		}
+		}
+	}
+}
+
 int main()
 {
 	std::wcout.imbue(std::locale("korean"));
 
 	WSADATA WSAData;
 	if (WSAStartup(MAKEWORD(2, 2), &WSAData) != 0) {
-		std::cout << "WSAStartup ½ÇÆÐ!\n";
+		std::cout << "WSAStartup ì‹¤íŒ¨!\n";
 		return -1;
 	}
 
-	SOCKET s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	if (s_socket <= 0) std::cout << "ERRPR" << "¿øÀÎ";
+	s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	if (s_socket <= 0) std::cout << "ERRPR" << "ì›ì¸";
 	else std::cout << "Socket Created.\n";
 
 	SOCKADDR_IN server_addr;
@@ -214,74 +316,24 @@ int main()
 	HANDLE hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(s_socket), hIOCP, -1, 0);
 
+	auto* accept_over = new EXP_OVER(ACCEPT);
+	SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	accept_over->accept_socket = c_socket;
+	AcceptEx(s_socket, c_socket, accept_over->packet, 0,
+		sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16,
+		NULL, reinterpret_cast<LPWSAOVERLAPPED>(accept_over));
 
-	{
-		EXP_OVER accept_over(ACCEPT);
-		SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-		accept_over.accept_socket = c_socket;
-		AcceptEx(s_socket, c_socket, accept_over.packet, 0,
-			sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16,
-			NULL, &accept_over.wsa_over);
+
+	int worker_cnt = std::thread::hardware_concurrency();
+	if (worker_cnt == 0) worker_cnt = 4;
+	vector<std::thread> workers;
+	for (int i = 0; i < worker_cnt; ++i) {
+		workers.emplace_back([hIOCP]() { work_thread(hIOCP); });
 	}
 
-	int new_id = 0;
-	while (true) {
-		DWORD io_size;
-		WSAOVERLAPPED* o;
-		ULONG_PTR key;
-		BOOL ret = GetQueuedCompletionStatus(hIOCP, &io_size, &key, &o, INFINITE);
-		EXP_OVER* eo = reinterpret_cast<EXP_OVER*>(o);
-		if ((eo->io_type == RECV || eo->io_type == SEND) && (0 == io_size)) {
-			if (Characters.count(key) != 0)
-				Characters.erase(key);
-			continue;
-		}
-		switch (eo->io_type) {
-		case ACCEPT:
-			CreateIoCompletionPort(reinterpret_cast<HANDLE>(eo->accept_socket),
-				hIOCP, new_id, 0);
-			Characters.try_emplace(new_id, std::make_shared<SESSION>(new_id, eo->accept_socket));
+	for (auto& t : workers) t.join();
 
-			new_id++;
-			{
-				EXP_OVER accept_over(ACCEPT);
-				SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-				accept_over.accept_socket = c_socket;
-				AcceptEx(s_socket, c_socket, accept_over.packet, 0,
-					sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16,
-					NULL, &accept_over.wsa_over);
-			}
-			break;
-		case SEND:
-			delete eo;
-			break;
-		case RECV:
-			auto character  = Characters.at(key); // ÀÌ°Å ¼öÁ¤ ÇÊ¿ä
-
-			unsigned char* p = eo->packet;
-			int data_size = io_size + character->remained;
-
-			while (p < eo->packet + data_size) {
-				unsigned char packet_size = *p;
-				if (p + packet_size > eo->packet + data_size)
-					break;
-				character->process_packet(p);
-				p = p + packet_size;
-			}
-
-			if (p < eo->packet + data_size)
-			{
-				character->remained = static_cast<unsigned char>(eo->packet + data_size - p);
-				memcpy(character->recv_over.packet, p, character->remained);
-			}
-			else
-				character->remained = 0;
-
-			character->recv();
-			break;
-
-		}
-	}
 	closesocket(s_socket);
 	WSACleanup();
+	return 0;
 }
