@@ -35,7 +35,6 @@ public:
 
 };
 
-
 SOCKET my_socket;
 bool key[4] = { false, false, false, false };
 Character player(MOVE_DOWN, 0);
@@ -105,7 +104,6 @@ void process_packet(char* ptr)
 	}
 	case S2C_P_MOVE:
 	{
-		//lock_guard<mutex> lock(m_network);
 		sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
 		int other_id = packet->id;
 
@@ -212,7 +210,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	(HBRUSH)(COLOR_WINDOW + 1), 0, L"MMORPG" };
 	RegisterClass(&wc);
 
-	hWnd = CreateWindow(L"MMORPG", L"MMORPG", WS_OVERLAPPEDWINDOW, 0, 0, WINDOW_SIZE, WINDOW_SIZE, NULL, (HMENU)NULL, hInstance, NULL);
+	hWnd = CreateWindow(L"MMORPG", L"MMORPG", WS_OVERLAPPEDWINDOW, 0, 0, WINDOW_SIZE+15, WINDOW_SIZE, NULL, (HMENU)NULL, hInstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 
 	MSG msg;

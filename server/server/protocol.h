@@ -32,9 +32,9 @@ constexpr unsigned short MOVE_DELAY_MS = 400; // 1초로조정해놔야하늬니라
 
 constexpr unsigned short MAP_HEIGHT = 2000;
 constexpr unsigned short MAP_WIDTH = 2000;
-constexpr unsigned short TILE_SIZE = 100;
-constexpr unsigned int WINDOW_SIZE = 900;
-constexpr int WINDOW_CENTER = 4;
+constexpr unsigned short TILE_SIZE = 40;
+constexpr unsigned int WINDOW_SIZE = 840;
+constexpr int WINDOW_CENTER = 10;
 
 #pragma pack (push, 1)
 
