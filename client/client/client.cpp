@@ -8,9 +8,11 @@
 #include <chrono>
 
 #include <WS2tcpip.h>
+
+#include <process.h> // 랜덤 이름
 #pragma comment (lib, "WS2_32.LIB")
 
-#include "..\..\server\server\protocol.h"
+#include "..\..\server\server\game_header.h"
 using namespace std;
 
 class Character {
@@ -23,13 +25,9 @@ public:
 	char name[MAX_ID_LENGTH]{};
 	long long id{};
 
-	Character(int Dir, int Frame) {
-		dir = Dir;
-		frame = Frame;
-		can_see = false;
-	}
-
 	Character() {
+		dir = MOVE_DOWN;
+		frame = 0;
 		can_see = false;
 	}
 
@@ -37,7 +35,7 @@ public:
 
 SOCKET my_socket;
 bool key[4] = { false, false, false, false };
-Character player(MOVE_DOWN, 0);
+Character player;
 unordered_map<INT, Character> Characters;
 
 atomic<bool> network_running{ true };
@@ -69,6 +67,7 @@ void logIn() {
 	cs_packet_login packet;
 	packet.size = sizeof(packet);
 	packet.type = C2S_P_LOGIN;
+	sprintf_s(player.name, "player_%d", _getpid()); // 임시 이름
 	strncpy_s(packet.name, sizeof(packet.name), player.name, _TRUNCATE);
 
 	send_packet(&packet);
@@ -194,7 +193,6 @@ void drawBackground(CImage& img, HDC hdc) {
 	}
 }
 
-HWND hwndOutput;
 HWND hWnd;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -263,7 +261,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		Ninja.Draw(memDC, TILE_SIZE * WINDOW_CENTER, TILE_SIZE * WINDOW_CENTER,
 			TILE_SIZE, TILE_SIZE, (player.dir - 1) * TILE_SIZE, player.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 		WCHAR szId[16];
-		swprintf(szId, 64, L"%d", player.id);
+		swprintf(szId, 32, L"%d", player.id);
 		TextOut(memDC, TILE_SIZE * WINDOW_CENTER, TILE_SIZE * WINDOW_CENTER - 20, szId, wcslen(szId));
 
 		for (auto& p : Characters) {

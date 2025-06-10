@@ -8,7 +8,7 @@
 #include <mutex>
 using namespace std;
 
-#include "protocol.h"
+#include "game_header.h"
 #pragma comment (lib,"WS2_32.LIB")
 #pragma comment (lib, "MSWSock.LIB")
 
@@ -86,7 +86,8 @@ public:
 		recv_over->wsabuf[0].buf = reinterpret_cast<CHAR*>(recv_over->packet + remained);
 		recv_over->wsabuf[0].len = sizeof(recv_over->packet) - remained;
 
-		WSARecv(socket, recv_over->wsabuf, 1, NULL, &recv_flag, &recv_over->wsa_over, NULL);
+		int r = WSARecv(socket, recv_over->wsabuf, 1, NULL, &recv_flag, &recv_over->wsa_over, NULL);
+		int err = WSAGetLastError();
 	}
 
 	void send_packet(void* packet)
@@ -133,7 +134,7 @@ public:
 			name = packet->name;
 			x = rand() % MAP_WIDTH;
 			y = rand() % MAP_HEIGHT;
-			printf("[DEBUG] 클라이언트 로그인!! (id=%lld, name=%s)\n", id, name.c_str());
+			printf("client[%lld] %s login\n", id, name.c_str());
 			send_player_info();
 
 			sc_packet_enter enter_packet;
@@ -199,6 +200,28 @@ std::atomic<long long> global_new_id = 0;
 SOCKET s_socket;
 mutex m_characters;
 
+void do_accept()
+{
+	auto* accept_over = new EXP_OVER(ACCEPT);
+	SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	if (c_socket == INVALID_SOCKET) {
+		printf("WSASocket failed for accept: %d\n", WSAGetLastError());
+		delete accept_over;
+		return;
+	}
+
+	accept_over->accept_socket = c_socket;
+
+	BOOL ok = AcceptEx(s_socket, c_socket, accept_over->packet, 0,
+		sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16,
+		NULL, reinterpret_cast<LPWSAOVERLAPPED>(accept_over));
+	if (!ok && WSAGetLastError() != WSA_IO_PENDING) {
+		printf("AcceptEx failed: %d\n", WSAGetLastError());
+		closesocket(c_socket);
+		delete accept_over;
+	}
+}
+
 void work_thread(HANDLE hIOCP) {
 	while (true) {
 		DWORD io_size;
@@ -222,7 +245,8 @@ void work_thread(HANDLE hIOCP) {
 		}
 
 		switch (eo->io_type) {
-		case ACCEPT: {
+		case ACCEPT:
+		{
 			long long session_id = global_new_id++;
 			CreateIoCompletionPort(reinterpret_cast<HANDLE>(eo->accept_socket), hIOCP, session_id, 0);
 
@@ -233,23 +257,7 @@ void work_thread(HANDLE hIOCP) {
 
 			delete eo;
 
-			auto* next_accept = new EXP_OVER(ACCEPT);
-			SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-			if (c_socket == INVALID_SOCKET) {
-				printf("WSASocket failed for accept: %d\n", WSAGetLastError());
-				delete next_accept;
-				break;
-			}
-			BOOL ok = AcceptEx(s_socket, c_socket, next_accept->packet, 0,
-				sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16,
-				NULL, reinterpret_cast<LPWSAOVERLAPPED>(next_accept));
-			if (!ok && WSAGetLastError() != WSA_IO_PENDING) {
-				printf("AcceptEx failed: %d\n", WSAGetLastError());
-				delete next_accept;
-				closesocket(c_socket);
-				break;
-			}
-
+			do_accept();
 			break;
 		}
 		case SEND: {
@@ -316,13 +324,7 @@ int main()
 	HANDLE hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(s_socket), hIOCP, -1, 0);
 
-	auto* accept_over = new EXP_OVER(ACCEPT);
-	SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	accept_over->accept_socket = c_socket;
-	AcceptEx(s_socket, c_socket, accept_over->packet, 0,
-		sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16,
-		NULL, reinterpret_cast<LPWSAOVERLAPPED>(accept_over));
-
+	do_accept();
 
 	int worker_cnt = std::thread::hardware_concurrency();
 	if (worker_cnt == 0) worker_cnt = 4;
