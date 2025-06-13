@@ -6,6 +6,7 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <string>
 
 #include <WS2tcpip.h>
 
@@ -14,6 +15,10 @@
 
 #include "..\..\server\server\game_header.h"
 using namespace std;
+
+bool make_id = false;
+char id_buffer[MAX_ID_LENGTH] = "";
+int id_len = 0;
 
 class Character {
 public:
@@ -40,7 +45,6 @@ unordered_map<INT, Character> Characters;
 
 atomic<bool> network_running{ true };
 thread network_thread;
-// mutex m_network;
 
 void send_packet(void* packet)
 {
@@ -67,9 +71,8 @@ void logIn() {
 	cs_packet_login packet;
 	packet.size = sizeof(packet);
 	packet.type = C2S_P_LOGIN;
-	sprintf_s(player.name, "player_%d", _getpid()); // 임시 이름
+	// sprintf_s(player.name, "player_%d", _getpid()); // 임시 이름
 	strncpy_s(packet.name, sizeof(packet.name), player.name, _TRUNCATE);
-
 	send_packet(&packet);
 }
 
@@ -167,6 +170,7 @@ void network_thread_func() {
 			network_running = false;
 		}
 	}
+	printf("network thread exit\n");
 }
 
 void drawBackground(CImage& img, HDC hdc) {
@@ -201,14 +205,14 @@ HINSTANCE g_hInst;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow)
 {
 	Initialize_socket();
-	logIn();
+	// logIn();
 	network_thread = std::thread(network_thread_func);
 
 	WNDCLASS wc = { 0, WndProc, 0, 0, hInstance, 0, LoadCursor(0, IDC_ARROW),
 	(HBRUSH)(COLOR_WINDOW + 1), 0, L"MMORPG" };
 	RegisterClass(&wc);
 
-	hWnd = CreateWindow(L"MMORPG", L"MMORPG", WS_OVERLAPPEDWINDOW, 0, 0, WINDOW_SIZE+15, WINDOW_SIZE, NULL, (HMENU)NULL, hInstance, NULL);
+	hWnd = CreateWindow(L"MMORPG", L"MMORPG", WS_OVERLAPPEDWINDOW, 0, 0, WINDOW_SIZE + 15, WINDOW_SIZE, NULL, (HMENU)NULL, hInstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 
 	MSG msg;
@@ -216,6 +220,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
+
 	return msg.wParam;
 }
 
@@ -225,9 +230,9 @@ HFONT hFont;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	HDC hDC, memDC;
-		PAINTSTRUCT ps;
-		RECT rc = { 0, 0, WINDOW_SIZE, WINDOW_SIZE };
-		HBRUSH hBrush;
+	PAINTSTRUCT ps;
+	RECT rc = { 0, 0, WINDOW_SIZE, WINDOW_SIZE };
+	HBRUSH hBrush;
 
 	switch (uMsg) {
 	case WM_CREATE: {
@@ -249,35 +254,47 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 		memDC = backBuffer.GetDC();
 		SelectObject(memDC, hFont);
-		SetTextColor(memDC, RGB(255, 255, 0));
+		SetTextColor(memDC, RGB(0, 0, 0));
 		SetBkMode(memDC, TRANSPARENT);
 
 		hBrush = CreateSolidBrush(RGB(0, 0, 0));
 		FillRect(memDC, &rc, hBrush);
 		DeleteObject(hBrush);
 
-		drawBackground(Background, memDC);
+		if (make_id) {
+			drawBackground(Background, memDC);
 
-		Ninja.Draw(memDC, TILE_SIZE * WINDOW_CENTER, TILE_SIZE * WINDOW_CENTER,
-			TILE_SIZE, TILE_SIZE, (player.dir - 1) * TILE_SIZE, player.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-		WCHAR szId[16];
-		swprintf(szId, 32, L"%d", player.id);
-		TextOut(memDC, TILE_SIZE * WINDOW_CENTER, TILE_SIZE * WINDOW_CENTER - 20, szId, wcslen(szId));
+			Ninja.Draw(memDC, TILE_SIZE * WINDOW_CENTER, TILE_SIZE * WINDOW_CENTER,
+				TILE_SIZE, TILE_SIZE, (player.dir - 1) * TILE_SIZE, player.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+			
+			wchar_t szName[32];
+			MultiByteToWideChar(CP_ACP, 0, player.name, -1, szName, 32);
+			TextOut(memDC, TILE_SIZE * WINDOW_CENTER, TILE_SIZE * WINDOW_CENTER - 20, szName, wcslen(szName));
 
-		for (auto& p : Characters) {
-			const Character& ch = p.second;
-			if (!ch.can_see) continue;
+			for (auto& p : Characters) {
+				const Character& ch = p.second;
+				if (!ch.can_see) continue;
 
-			int offset_x = ch.x - player.x;
-			int offset_y = ch.y - player.y;
-			int draw_x = TILE_SIZE * (WINDOW_CENTER + offset_x);
-			int draw_y = TILE_SIZE * (WINDOW_CENTER + offset_y);
+				int offset_x = ch.x - player.x;
+				int offset_y = ch.y - player.y;
+				int draw_x = TILE_SIZE * (WINDOW_CENTER + offset_x);
+				int draw_y = TILE_SIZE * (WINDOW_CENTER + offset_y);
 
-			Ninja.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
-				(ch.dir - 1) * TILE_SIZE, ch.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+				Ninja.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
+					(ch.dir - 1) * TILE_SIZE, ch.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 
-			swprintf(szId, 32, L"%d", ch.id);
-			TextOut(memDC, draw_x, draw_y - 20, szId, wcslen(szId));
+				MultiByteToWideChar(CP_ACP, 0, ch.name, -1, szName, 32);
+				TextOut(memDC, draw_x, draw_y - 20, szName, wcslen(szName));
+			}
+		}
+		else {
+			RECT r = { 50, 220, 400, 260 };
+			SetBkMode(memDC, TRANSPARENT);
+			SetTextColor(memDC, RGB(255, 255, 0));
+			DrawTextA(memDC, "아이디를 입력하세요:", -1, &r, DT_LEFT | DT_SINGLELINE);
+
+			RECT r2 = { 50, 250, 400, 280 };
+			DrawTextA(memDC, id_buffer, -1, &r2, DT_LEFT | DT_SINGLELINE);
 		}
 
 		BitBlt(hDC, 0, 0, WINDOW_SIZE, WINDOW_SIZE, memDC, 0, 0, SRCCOPY);
@@ -286,6 +303,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		EndPaint(hWnd, &ps);
 		break;
 	}
+	case WM_CHAR:
+		if (!make_id) {
+			if (wParam == VK_BACK && id_len > 0) {
+				id_buffer[--id_len] = '\0';
+			}
+			else if (wParam == VK_RETURN) {
+				if (id_len == 0)
+					sprintf_s(player.name, "player_%d", _getpid());
+				else {
+					strncpy_s(player.name, sizeof(player.name), id_buffer, _TRUNCATE);
+					player.name[sizeof(player.name) - 1] = '\0';
+				}
+					logIn();
+					make_id = true;
+					id_len = 0; id_buffer[0] = '\0';
+			}
+			else if (id_len < MAX_ID_LENGTH - 1 && isprint((char)wParam)) {
+				id_buffer[id_len++] = (char)wParam;
+				id_buffer[id_len] = '\0';
+			}
+			InvalidateRect(hWnd, NULL, FALSE);
+			break;
+		}
+		break;
 	case WM_KEYDOWN:
 	{
 		switch (wParam) {
@@ -338,11 +379,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 		if (hFont) { DeleteObject(hFont); hFont = nullptr; }
 
+		closesocket(my_socket);
 		network_running = false;
 		if (network_thread.joinable())
 			network_thread.join();
 
-		closesocket(my_socket);
 		WSACleanup();
 		PostQuitMessage(0);
 		break;
