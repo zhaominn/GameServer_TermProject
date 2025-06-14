@@ -30,15 +30,10 @@ void InitializeNPC()
 {
 	cout << "NPC intialize begin.\n";
 	for (int i = 0; i < NUM_MONSTER; ++i) {
-		npcs[i] = make_shared<NPC_SESSION>(MAX_USER + i, "NPC" + std::to_string(i));
+		int npc_id = MAX_USER + i;
+		npcs[npc_id] = make_shared<NPC_SESSION>(npc_id, "NPC" + std::to_string(i));
 	}
 	cout << "NPC initialize end.\n";
-}
-
-bool can_see(SESSION from, SESSION to)
-{
-	if (abs(from.x - to.x) > VIEW_RANGE) return false;
-	return abs(from.y - to.y) <= VIEW_RANGE;
 }
 
 void do_accept()
@@ -68,11 +63,15 @@ void npc_thread_func() {
 	while (npc_running) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(500)); // 0.5초마다
 
+		auto now = std::chrono::steady_clock::now();
 		std::lock_guard<std::mutex> lock(m_characters);
 		for (auto& it : npcs) {
 			auto& npc = it.second;
-			if (!npc->active)
-				continue; // 비활성 NPC는 쉬기
+			if ((npc->next_move > now)|| (!npc->active)) continue;
+
+			std::unordered_map<long long, bool> old_seen;
+			for (auto& u : Characters)
+				old_seen[u.first] = u.second->view_list.count(npc->id) > 0;
 
 			// 랜덤 방향으로 이동
 			int dir = rand() % 4;
@@ -83,16 +82,27 @@ void npc_thread_func() {
 			case 3: if (npc->x < MAP_WIDTH - 1) npc->x++; break;
 			}
 
-			// 모든 플레이어에게 NPC 이동 브로드캐스팅
-			sc_packet_move packet;
-			packet.size = sizeof(packet);
-			packet.type = S2C_P_MOVE;
-			packet.id = npc->id;
-			packet.x = npc->x;
-			packet.y = npc->y;
 			for (auto& u : Characters) {
-				u.second->send_packet(&packet);
+				bool now_seen = u.second->can_see(*npc);
+				bool was_seen = old_seen[u.first];
+
+				if (now_seen && !was_seen) {
+					// ENTER: 처음 보임
+					u.second->send_add_player_packet(npc->id);
+					u.second->view_list.insert(npc->id);
+				}
+				else if (!now_seen && was_seen) {
+					// LEAVE: 시야에서 나감
+					u.second->send_remove_player_packet(npc->id);
+					u.second->view_list.erase(npc->id);
+				}
+				else if (now_seen && was_seen) {
+					// MOVE: 여전히 시야 안 (좌표만 update)
+					u.second->send_move_player_packet(npc->id);
+				}
 			}
+
+			npc->next_move = std::chrono::steady_clock::now() + std::chrono::milliseconds(100 + (rand() % 5000));
 		}
 	}
 }
@@ -117,13 +127,6 @@ void work_thread(HANDLE hIOCP) {
 				continue;
 			}
 		}
-		/*
-		if ((0 == io_size) && ((eo->io_type == RECV) || (eo->io_type == SEND))) {
-			disconnect(static_cast<int>(key));
-			if (eo->io_type == SEND) delete eo;
-			continue;
-		}
-*/
 		switch (eo->io_type) {
 		case ACCEPT:
 		{

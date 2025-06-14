@@ -88,8 +88,8 @@ void process_packet(char* ptr)
 		player.x = packet->x;
 		player.y = packet->y;
 		player.can_see = true;
-	}
 	break;
+	}
 	case S2C_P_ENTER:
 	{
 		sc_packet_enter* packet = reinterpret_cast<sc_packet_enter*>(ptr);
@@ -121,7 +121,6 @@ void process_packet(char* ptr)
 		}
 		break;
 	}
-
 	case S2C_P_MOVE:
 	{
 		sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
@@ -141,7 +140,6 @@ void process_packet(char* ptr)
 		}
 		break;
 	}
-
 	case S2C_P_LEAVE:
 	{
 		sc_packet_leave* packet = reinterpret_cast<sc_packet_leave*>(ptr);

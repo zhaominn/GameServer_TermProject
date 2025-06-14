@@ -1,5 +1,6 @@
 #pragma once
-#include <memory>
+#include <set>
+#include <chrono>
 #include "exp_over.h"
 
 enum STATE { EMPTY, CONNECTED, INGAME };
@@ -19,6 +20,8 @@ public:
 	unsigned char remained;
 	unsigned char recv_buffer[MAX_CHAT_LENGTH];
 
+	std::set<int> view_list;
+
 public:
 	SESSION() : id(0), name(), x(0), y(0), max_hp(0), hp(0), level(0), exp(0),
 		socket(INVALID_SOCKET), state(EMPTY), remained(0) {
@@ -35,28 +38,36 @@ public:
 
 	void send_player_info();
 
-	void send_player_pos();
+	void send_move_player_packet(int target_id);
+
+	void send_add_player_packet(int target_id);
+
+	void send_remove_player_packet(int target_id);
 
 	void process_packet(unsigned char* p);
+
+	bool can_see(const SESSION& other) const;
 };
 
 class NPC_SESSION : public SESSION {
 public:
 	bool active;
+	std::chrono::steady_clock::time_point next_move;
 
 	NPC_SESSION() = default;
 
 	NPC_SESSION(int id, std::string name) {
 		this->id = id;
 		this->name = name;
-		this->x = rand() % MAP_WIDTH;
-		this->y = rand() % MAP_HEIGHT;
-		this->max_hp = NPC_MAX_HP;
-		this->hp = NPC_MAX_HP;
-		this->level = 0;
-		this->exp = 0;
-		this->state = INGAME;
-		this->active = true;
+		x = rand() % MAP_WIDTH;
+		y = rand() % MAP_HEIGHT;
+		max_hp = NPC_MAX_HP;
+		hp = NPC_MAX_HP;
+		level = 0;
+		exp = 0;
+		state = INGAME;
+		active = false;
+		next_move = std::chrono::steady_clock::now() + std::chrono::milliseconds(100 + (rand() % 5000))
 	}
 
 	void send_enter_packet(SESSION *session) {
