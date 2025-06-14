@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <string>
 
 #include <WS2tcpip.h>
 #include <MSWSock.h>
@@ -17,13 +18,27 @@
 using namespace std;
 
 unordered_map<long long, shared_ptr<SESSION>> Characters;
+unordered_map<long long, shared_ptr<NPC_SESSION>> npcs;
 
 std::atomic<long long> global_new_id = 0;
 
 SOCKET s_socket;
 mutex m_characters;
 
-std::set<void*> allocated_overlapped_ptrs;
+void InitializeNPC()
+{
+	cout << "NPC intialize begin.\n";
+	for (int i = 0; i < NUM_MONSTER; ++i) {
+		npcs[i] = make_shared<NPC_SESSION>(i, "NPC" + std::to_string(i));
+	}
+	cout << "NPC initialize end.\n";
+}
+
+bool can_see(SESSION from, SESSION to)
+{
+	if (abs(from.x - to.x) > VIEW_RANGE) return false;
+	return abs(from.y - to.y) <= VIEW_RANGE;
+}
 
 void do_accept()
 {
@@ -46,20 +61,18 @@ void do_accept()
 		delete accept_over;
 		return;
 	}
-	allocated_overlapped_ptrs.insert(accept_over);
 }
 
 void work_thread(HANDLE hIOCP) {
 	while (true) {
 		DWORD io_size;
-		WSAOVERLAPPED* o;
 		ULONG_PTR key;
-		BOOL ret = GetQueuedCompletionStatus(hIOCP, &io_size, &key, &o, INFINITE);
-		if (!o) continue;
+		WSAOVERLAPPED* over;
+		GetQueuedCompletionStatus(hIOCP, &io_size, &key, &over, INFINITE);
+		if (!over) continue;
 
-		EXP_OVER* eo = reinterpret_cast<EXP_OVER*>(o);
+		EXP_OVER* eo = reinterpret_cast<EXP_OVER*>(over);
 
-		std::shared_ptr<SESSION> character;
 		{
 			std::lock_guard<std::mutex> lock(m_characters);
 
@@ -70,7 +83,13 @@ void work_thread(HANDLE hIOCP) {
 				continue;
 			}
 		}
-
+		/*
+		if ((0 == io_size) && ((eo->io_type == RECV) || (eo->io_type == SEND))) {
+			disconnect(static_cast<int>(key));
+			if (eo->io_type == SEND) delete eo;
+			continue;
+		}
+*/
 		switch (eo->io_type) {
 		case ACCEPT:
 		{
@@ -81,10 +100,6 @@ void work_thread(HANDLE hIOCP) {
 				std::lock_guard<std::mutex> lock(m_characters);
 				Characters.emplace(session_id, std::make_shared<SESSION>(session_id, eo->accept_socket));
 			}
-			if (allocated_overlapped_ptrs.count(o) == 0) {
-				printf(">>>>> [HEAP CORRUPTION] Unmanaged overlapped pointer returned from GQCS: %p <<<<<\n", o);
-			}
-			allocated_overlapped_ptrs.erase(o);
 			
 			delete eo;
 
@@ -98,6 +113,7 @@ void work_thread(HANDLE hIOCP) {
 		}
 		case RECV:
 		{
+			std::shared_ptr<SESSION> character;
 			{
 				std::lock_guard<std::mutex> lock(m_characters);
 				auto it = Characters.find(key);
@@ -123,7 +139,7 @@ void work_thread(HANDLE hIOCP) {
 			else {
 				character->remained = 0;
 			}
-			character->recv();
+			character->recv_packet();
 			delete eo;
 			break;
 		}
@@ -157,6 +173,7 @@ int main()
 	HANDLE hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(s_socket), hIOCP, -1, 0);
 
+	InitializeNPC();
 	do_accept();
 
 	int worker_cnt = std::thread::hardware_concurrency();

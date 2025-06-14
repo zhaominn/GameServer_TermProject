@@ -94,16 +94,25 @@ void process_packet(char* ptr)
 		sc_packet_enter* packet = reinterpret_cast<sc_packet_enter*>(ptr);
 		int id = packet->id;
 
-		if (id < MAX_USER) {
+		if (id == player.id) {
+			// 내 캐릭터는 Characters에 안 넣고 player에만!
+			player.x = packet->x;
+			player.y = packet->y;
+			strncpy_s(player.name, packet->name, MAX_ID_LENGTH);
+			player.name[MAX_ID_LENGTH - 1] = '\0';
+			player.can_see = true;
+		}
+		else if (id < MAX_USER) {
 			Characters[id].x = packet->x;
 			Characters[id].y = packet->y;
-			Characters[id].id = packet->id;
+			Characters[id].id = id;
 			strncpy_s(Characters[id].name, packet->name, MAX_ID_LENGTH);
 			Characters[id].name[MAX_ID_LENGTH - 1] = '\0';
-			Characters[id].can_see = true;;
+			Characters[id].can_see = true;
 		}
 		break;
 	}
+
 	case S2C_P_MOVE:
 	{
 		sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
@@ -205,7 +214,6 @@ HINSTANCE g_hInst;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow)
 {
 	Initialize_socket();
-	// logIn();
 	network_thread = std::thread(network_thread_func);
 
 	WNDCLASS wc = { 0, WndProc, 0, 0, hInstance, 0, LoadCursor(0, IDC_ARROW),
@@ -224,7 +232,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	return msg.wParam;
 }
 
-CImage Ninja, Background;
+CImage Ninja, NinjaDark, Background;
 CImage backBuffer;
 HFONT hFont;
 
@@ -237,6 +245,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch (uMsg) {
 	case WM_CREATE: {
 		Ninja.Load(L"img/Ninja.png");
+		NinjaDark.Load(L"img/NinjaDark.png");
 		Background.Load(L"img/Grass2.png");
 
 		backBuffer.Create(WINDOW_SIZE, WINDOW_SIZE, 32);
@@ -280,7 +289,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				int draw_x = TILE_SIZE * (WINDOW_CENTER + offset_x);
 				int draw_y = TILE_SIZE * (WINDOW_CENTER + offset_y);
 
-				Ninja.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
+				NinjaDark.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
 					(ch.dir - 1) * TILE_SIZE, ch.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 
 				MultiByteToWideChar(CP_ACP, 0, ch.name, -1, szName, 32);

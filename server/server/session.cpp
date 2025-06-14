@@ -11,16 +11,13 @@
 #include "game_header.h"
 
 extern std::unordered_map<long long, std::shared_ptr<SESSION>> Characters;
-
-SESSION::SESSION() {
-	std::cout << "DEFAULT SESSION 생성자 호출\n";
-	exit(-1);
-}
+extern std::unordered_map<long long, std::shared_ptr<NPC_SESSION>> npcs;
 
 SESSION::SESSION(long long session_id, SOCKET s) : id(session_id), socket(s)
 {
+	state = EMPTY;
 	remained = 0;
-	recv();
+	recv_packet();
 }
 
 SESSION::~SESSION()
@@ -36,8 +33,9 @@ SESSION::~SESSION()
 	closesocket(socket);
 }
 
-void SESSION::recv()
+void SESSION::recv_packet()
 {
+	
 	if (socket == INVALID_SOCKET) {
 		// 이미 제거된 세션, 죽은 소켓일 수 있음
 		return;
@@ -67,7 +65,18 @@ void SESSION::recv()
 		// 세션 강제 삭제 또는 오류 기록
 		return;
 	}
-	// else 정상동작 (recv_over의 책임 Life-cycle은 IOCP/worker에게 위임)
+	/*
+	auto* recv_over = new EXP_OVER(RECV);
+	DWORD recv_flag = 0;
+	ZeroMemory(&recv_over->wsa_over, sizeof(recv_over->wsa_over));
+	if (remained > 0)
+		memcpy(recv_over->packet, recv_buffer, remained);
+
+	recv_over->wsabuf[0].buf = reinterpret_cast<CHAR*>(recv_over->packet + remained);
+	recv_over->wsabuf[0].len = sizeof(recv_over->packet) - remained;
+
+	int r = WSARecv(socket, recv_over->wsabuf, 1, NULL, &recv_flag, &recv_over->wsa_over, NULL);
+	int err = WSAGetLastError();*/
 }
 
 void SESSION::send_packet(void* packet)
@@ -76,8 +85,7 @@ void SESSION::send_packet(void* packet)
 	const unsigned char packet_size = reinterpret_cast<unsigned char*>(packet)[0];
 	memcpy(o->packet, packet, packet_size);
 	o->wsabuf[0].len = packet_size;
-	DWORD size_sent;
-	WSASend(socket, o->wsabuf, 1, &size_sent, 0, &(o->wsa_over), NULL);
+	WSASend(socket, o->wsabuf, 1, 0, 0, &(o->wsa_over), NULL);
 }
 
 void SESSION::send_player_info()
@@ -144,6 +152,11 @@ void SESSION::process_packet(unsigned char* p)
 				send_packet(&character_enter_packet);
 			}
 		}
+
+		for (auto& n : npcs) {
+			n.second->send_enter_packet(this);
+		}
+
 		break;
 	}
 	case C2S_P_MOVE:
