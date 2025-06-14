@@ -4,6 +4,7 @@
 
 extern std::unordered_map<long long, std::shared_ptr<SESSION>> Characters;
 extern std::unordered_map<long long, std::shared_ptr<NPC_SESSION>> npcs;
+extern tile_info tile_map[MAP_WIDTH][MAP_HEIGHT];
 
 SESSION::SESSION(long long session_id, SOCKET s) : id(session_id), socket(s)
 {
@@ -182,13 +183,20 @@ void SESSION::process_packet(unsigned char* p)
 			}
 			send_add_player_packet(vid);
 		}
+		/*
+		sc_packet_tilemap tile_packet;
+		tile_packet.size = sizeof(tile_packet);
+		tile_packet.type = S2C_P_TILEMAP;
+		memcpy(tile_packet.tile_map, tile_map, sizeof(tile_map));
 
+		send_packet(&tile_packet);*/
 		break;
 	}
 	case C2S_P_MOVE:
 	{
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(p);
 		short old_x = x; short old_y = y;
+
 		switch (packet->direction) {
 		case MOVE_UP: if (y > 0) --y; break;
 		case MOVE_DOWN: if (y < (MAP_HEIGHT - 1)) ++y; break;
@@ -196,45 +204,51 @@ void SESSION::process_packet(unsigned char* p)
 		case MOVE_RIGHT:if (x < (MAP_WIDTH - 1)) ++x; break;
 		}
 
+		std::set<long long> candidate_ids;
+		get_aoi_candidates(x, y, candidate_ids);
 		std::set<long long> near_list;
 		std::set<long long> old_vlist = view_list;
 
-		get_aoi_candidates(x, y, near_list);
+		for (auto id : candidate_ids) {
+			if (id == this->id) continue; // 자기 자신은 제외
+			if (Characters.count(id) && can_see(*Characters[id])) {
+				near_list.insert(id);
+			}
+			else if (npcs.count(id) && can_see(*npcs[id])) {
+				near_list.insert(id);
+			}
+		}
 
 		move_object(id, old_x, old_y, x, y);
 		send_move_player_packet(id);
 
-		for (auto& c : Characters) {
-			if (c.first != id && can_see(*c.second))
-				near_list.insert(c.second->id);
-		}
-		for (auto& c : npcs) {
-			if (can_see(*c.second))
-				near_list.insert(c.second->id);
-		}
+		for (auto nl : near_list) {
+			bool is_new = (old_vlist.count(nl) == 0);
 
-		for (auto& nl : near_list) {
 			if (nl < MAX_USER) {
-				if (Characters[nl]->view_list.count(id)) {
-					Characters[nl]->send_move_player_packet(id);
+				// 플레이어: 내 시야에 새로 들어온 상태
+				if (Characters.count(nl) && Characters[nl]->view_list.count(id)) {
+					Characters[nl]->send_move_player_packet(id); // 그쪽에서 나의 움직임도 알림
 				}
 			}
 			else {
-				if (old_vlist.count(nl) == 0)
+				// NPC: 처음 내 시야에 들어왔다면 active 켜주기
+				if (is_new && npcs.count(nl))
 					npcs[nl]->active = true;
 			}
-
-			if (old_vlist.count(nl) == 0)
-				send_add_player_packet(nl);
+			if (is_new)
+				send_add_player_packet(nl); // 내 클라에 엔터 패킷
 		}
 
-		for (auto& ol : old_vlist) {
+		for (auto ol : old_vlist) {
 			if (near_list.count(ol) == 0) {
-				send_remove_player_packet(ol);
-				if (ol < MAX_USER)
-					Characters[ol]->send_remove_player_packet(ol);
+				send_remove_player_packet(ol); // 내 클라에서 엔피씨/플레이어 감추기
+				if (ol < MAX_USER && Characters.count(ol)) {
+					Characters[ol]->send_remove_player_packet(id); // 상대도 내 퇴장 감지
+				}
 			}
 		}
+
 		view_list = std::move(near_list);
 
 		break;

@@ -5,12 +5,22 @@ using namespace std;
 
 unordered_map<long long, shared_ptr<SESSION>> Characters;
 unordered_map<long long, shared_ptr<NPC_SESSION>> npcs;
+tile_info tile_map[MAP_WIDTH][MAP_HEIGHT];
 
 atomic<long long> global_new_id = 0;
 atomic<bool> npc_running = true;
 
 SOCKET s_socket;
 mutex m_characters;
+
+void InitializeMap() {
+	for (int i = 0; i < MAP_WIDTH; ++i) {
+		for (int j = 0; j < MAP_HEIGHT; ++j) {
+			tile_map[i][j].tile = (rand() % 4 == 3) ? 1 : 0; // 3:1로 장애물(1), 땅(0)
+			tile_map[i][j].rock_num = rand() % 3;
+		}
+	}
+}
 
 void InitializeNPC()
 {
@@ -161,6 +171,7 @@ int main()
 	HANDLE hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(s_socket), hIOCP, -1, 0);
 
+	InitializeMap();
 	InitializeNPC();
 	thread npc_thread(npc_thread_func);
 	do_accept();
@@ -181,4 +192,3 @@ int main()
 	WSACleanup();
 	return 0;
 }
-

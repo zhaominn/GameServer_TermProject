@@ -47,6 +47,14 @@ unordered_map<INT, Character> npcs;
 atomic<bool> network_running{ true };
 thread network_thread;
 
+class Map {
+public:
+	int tile;		// 0 땅, 1 장애물 
+	int rock_num;	// 0, 1, 2 중에 하나
+};
+
+Map tile_map[MAP_WIDTH][MAP_HEIGHT];
+
 void send_packet(void* packet)
 {
 	unsigned char* p = reinterpret_cast<unsigned char*>(packet);
@@ -88,7 +96,7 @@ void process_packet(char* ptr)
 		player.x = packet->x;
 		player.y = packet->y;
 		player.can_see = true;
-	break;
+		break;
 	}
 	case S2C_P_ENTER:
 	{
@@ -153,6 +161,12 @@ void process_packet(char* ptr)
 		else if (Characters.count(other_id)) { // 플레이어 나감
 			Characters[other_id].can_see = false;
 		}
+		break;
+	}
+	case S2C_P_TILEMAP: {
+		sc_packet_tilemap* p = reinterpret_cast<sc_packet_tilemap*>(ptr);
+		memcpy(tile_map, p->tile_map, sizeof(tile_map));
+
 		break;
 	}
 	default:
@@ -223,6 +237,25 @@ void drawBackground(CImage& img, HDC hdc) {
 	}
 }
 
+void drawRock(CImage& img, HDC hdc) {
+	// (drawBackground 호출 바로 아래)
+	for (int dy = -WINDOW_CENTER; dy <= WINDOW_CENTER; ++dy) {
+		for (int dx = -WINDOW_CENTER; dx <= WINDOW_CENTER; ++dx) {
+			int world_x = player.x + dx;
+			int world_y = player.y + dy;
+			if (world_x < 0 || world_x >= MAP_WIDTH || world_y < 0 || world_y >= MAP_HEIGHT) continue;
+
+			int draw_x = TILE_SIZE * (WINDOW_CENTER + dx);
+			int draw_y = TILE_SIZE * (WINDOW_CENTER + dy);
+
+			if (tile_map[world_x][world_y].tile == 1)
+				img.Draw(hdc, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
+					0, tile_map[world_x][world_y].rock_num * 100, 100, 100);
+		}
+	}
+
+}
+
 HWND hWnd;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -249,7 +282,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	return msg.wParam;
 }
 
-CImage Ninja, NinjaDark, Background;
+CImage Ninja, NinjaDark, Background, Rock;
 CImage backBuffer;
 HFONT hFont;
 
@@ -264,6 +297,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		Ninja.Load(L"img/Ninja.png");
 		NinjaDark.Load(L"img/NinjaDark.png");
 		Background.Load(L"img/Grass2.png");
+		Rock.Load(L"img/Rock.png");
 
 		backBuffer.Create(WINDOW_SIZE, WINDOW_SIZE, 32);
 
@@ -289,10 +323,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 		if (make_id) {
 			drawBackground(Background, memDC);
+			drawRock(Rock, memDC);
 
 			Ninja.Draw(memDC, TILE_SIZE * WINDOW_CENTER, TILE_SIZE * WINDOW_CENTER,
 				TILE_SIZE, TILE_SIZE, (player.dir - 1) * TILE_SIZE, player.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-			
+
 			wchar_t szName[32];
 			MultiByteToWideChar(CP_ACP, 0, player.name, -1, szName, 32);
 			TextOut(memDC, TILE_SIZE * WINDOW_CENTER, TILE_SIZE * WINDOW_CENTER - 20, szName, wcslen(szName));
@@ -357,9 +392,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					strncpy_s(player.name, sizeof(player.name), id_buffer, _TRUNCATE);
 					player.name[sizeof(player.name) - 1] = '\0';
 				}
-					logIn();
-					make_id = true;
-					id_len = 0; id_buffer[0] = '\0';
+				logIn();
+				make_id = true;
+				id_len = 0; id_buffer[0] = '\0';
 			}
 			else if (id_len < MAX_ID_LENGTH - 1 && isprint((char)wParam)) {
 				id_buffer[id_len++] = (char)wParam;

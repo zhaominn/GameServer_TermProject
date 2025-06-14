@@ -21,6 +21,7 @@ constexpr char C2S_P_CHAT = 11;
 constexpr char C2S_P_TELEPORT = 12;		// 동접 테스트 할 때
 // 시작마을의 HOTSPOT을 방지하기 위해 
 // RANDOM TELEPORT할 때 사용
+constexpr char S2C_P_TILEMAP = 13;
 
 constexpr char MAX_ID_LENGTH = 20;
 
@@ -135,5 +136,15 @@ struct cs_packet_teleport {
 	char  type;
 };
 
-#pragma pack (pop)
+struct tile_info {
+	unsigned char tile;     // 0: 땅, 1: 장애물 등
+	unsigned char rock_num; // 0~2
+};
 
+struct sc_packet_tilemap {
+	unsigned char size;
+	char type;
+	// 실제 플레이어 패킷 규약에는 더 다양한 필드 가능
+	tile_info tile_map[MAP_WIDTH][MAP_HEIGHT];
+};
+#pragma pack (pop)
