@@ -56,7 +56,7 @@ public:
 		this->level = 0;
 		this->exp = 0;
 		this->state = INGAME;
-		this->active = false;
+		this->active = true;
 	}
 
 	void send_enter_packet(SESSION *session) {

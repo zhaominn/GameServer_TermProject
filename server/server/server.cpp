@@ -30,7 +30,7 @@ void InitializeNPC()
 {
 	cout << "NPC intialize begin.\n";
 	for (int i = 0; i < NUM_MONSTER; ++i) {
-		npcs[i] = make_shared<NPC_SESSION>(MAX_USER+i, "NPC" + std::to_string(i));
+		npcs[i] = make_shared<NPC_SESSION>(MAX_USER + i, "NPC" + std::to_string(i));
 	}
 	cout << "NPC initialize end.\n";
 }
@@ -44,7 +44,7 @@ bool can_see(SESSION from, SESSION to)
 void do_accept()
 {
 	EXP_OVER* accept_over = new EXP_OVER(ACCEPT);
-	
+
 	SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 	if (c_socket == INVALID_SOCKET) {
 		printf("WSASocket failed for accept: %d\n", WSAGetLastError());
@@ -52,7 +52,7 @@ void do_accept()
 		return;
 	}
 	accept_over->accept_socket = c_socket;
-	
+
 	BOOL ok = AcceptEx(s_socket, c_socket, accept_over->packet, 0,
 		sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16,
 		NULL, reinterpret_cast<LPWSAOVERLAPPED>(accept_over));
@@ -61,6 +61,39 @@ void do_accept()
 		closesocket(c_socket);
 		delete accept_over;
 		return;
+	}
+}
+
+void npc_thread_func() {
+	while (npc_running) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(500)); // 0.5초마다
+
+		std::lock_guard<std::mutex> lock(m_characters);
+		for (auto& it : npcs) {
+			auto& npc = it.second;
+			if (!npc->active)
+				continue; // 비활성 NPC는 쉬기
+
+			// 랜덤 방향으로 이동
+			int dir = rand() % 4;
+			switch (dir) {
+			case 0: if (npc->y > 0) npc->y--; break;
+			case 1: if (npc->y < MAP_HEIGHT - 1) npc->y++; break;
+			case 2: if (npc->x > 0) npc->x--; break;
+			case 3: if (npc->x < MAP_WIDTH - 1) npc->x++; break;
+			}
+
+			// 모든 플레이어에게 NPC 이동 브로드캐스팅
+			sc_packet_move packet;
+			packet.size = sizeof(packet);
+			packet.type = S2C_P_MOVE;
+			packet.id = npc->id;
+			packet.x = npc->x;
+			packet.y = npc->y;
+			for (auto& u : Characters) {
+				u.second->send_packet(&packet);
+			}
+		}
 	}
 }
 
@@ -101,7 +134,7 @@ void work_thread(HANDLE hIOCP) {
 				std::lock_guard<std::mutex> lock(m_characters);
 				Characters.emplace(session_id, std::make_shared<SESSION>(session_id, eo->accept_socket));
 			}
-			
+
 			delete eo;
 
 			do_accept();
@@ -175,6 +208,7 @@ int main()
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(s_socket), hIOCP, -1, 0);
 
 	InitializeNPC();
+	thread npc_thread(npc_thread_func);
 	do_accept();
 
 	int worker_cnt = std::thread::hardware_concurrency();
@@ -185,6 +219,9 @@ int main()
 	}
 
 	for (auto& t : workers) t.join();
+
+	npc_running = false;
+	npc_thread.join();
 
 	closesocket(s_socket);
 	WSACleanup();
