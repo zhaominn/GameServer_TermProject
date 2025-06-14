@@ -1,10 +1,5 @@
 #pragma once
-#include <WS2tcpip.h>
-#include <MSWSock.h>
-#pragma comment (lib,"WS2_32.LIB")
-#pragma comment (lib, "MSWSock.LIB")
-
-#include "game_header.h"
+#include "sector.h"
 
 enum IO_TYPE { RECV, SEND, ACCEPT };
 

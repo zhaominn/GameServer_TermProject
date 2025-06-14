@@ -1,24 +1,9 @@
-#include <iostream>
-#include <set>
-#include <unordered_set>
-
-#include <WS2tcpip.h>
-#include <MSWSock.h>
-#pragma comment (lib,"WS2_32.LIB")
-#pragma comment (lib, "MSWSock.LIB")
-
-#include <unordered_map>
-
-#include "session.h"
+#include "pch.h"
 #include "npc_session.h"
-#include "game_header.h"
+
 
 extern std::unordered_map<long long, std::shared_ptr<SESSION>> Characters;
 extern std::unordered_map<long long, std::shared_ptr<NPC_SESSION>> npcs;
-
-std::unordered_set<long long> sectors[SECTOR_W][SECTOR_H];
-inline int get_sector_x(int x) { return x / SECTOR_SIZE; }
-inline int get_sector_y(int y) { return y / SECTOR_SIZE; }
 
 SESSION::SESSION(long long session_id, SOCKET s) : id(session_id), socket(s)
 {
@@ -37,6 +22,7 @@ SESSION::~SESSION()
 		if (id != c.first)
 			c.second->send_packet(&leave_packet);
 	}
+	remove_object(id, x, y);
 	closesocket(socket);
 }
 
@@ -172,6 +158,8 @@ void SESSION::process_packet(unsigned char* p)
 		enter_packet.x = x;
 		enter_packet.y = y;
 
+		add_object(id, x, y);
+
 		for (auto& c : Characters) {
 			if (c.first != id && can_see(*c.second)) {
 				c.second->send_packet(&enter_packet);
@@ -200,6 +188,7 @@ void SESSION::process_packet(unsigned char* p)
 	case C2S_P_MOVE:
 	{
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(p);
+		short old_x = x; short old_y = y;
 		switch (packet->direction) {
 		case MOVE_UP: if (y > 0) --y; break;
 		case MOVE_DOWN: if (y < (MAP_HEIGHT - 1)) ++y; break;
@@ -207,9 +196,12 @@ void SESSION::process_packet(unsigned char* p)
 		case MOVE_RIGHT:if (x < (MAP_WIDTH - 1)) ++x; break;
 		}
 
-		std::set<int> near_list;
-		std::set<int> old_vlist = view_list;
+		std::set<long long> near_list;
+		std::set<long long> old_vlist = view_list;
 
+		get_aoi_candidates(x, y, near_list);
+
+		move_object(id, old_x, old_y, x, y);
 		send_move_player_packet(id);
 
 		for (auto& c : Characters) {
@@ -237,7 +229,7 @@ void SESSION::process_packet(unsigned char* p)
 		}
 
 		for (auto& ol : old_vlist) {
-			if(near_list.count(ol)==0){
+			if (near_list.count(ol) == 0) {
 				send_remove_player_packet(ol);
 				if (ol < MAX_USER)
 					Characters[ol]->send_remove_player_packet(ol);

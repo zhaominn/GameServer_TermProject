@@ -1,9 +1,5 @@
-#include <iostream>
-#include <unordered_map>
-
-#include "session.h"
+#include "pch.h"
 #include "npc_session.h"
-#include "game_header.h"
 
 extern std::unordered_map<long long, std::shared_ptr<SESSION>> Characters;
 

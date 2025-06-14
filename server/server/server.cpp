@@ -1,20 +1,5 @@
-﻿#include <WS2tcpip.h>
-#include <MSWSock.h>
-#pragma comment (lib,"WS2_32.LIB")
-#pragma comment (lib, "MSWSock.LIB")
-
-#include <iostream>
-#include <string>
-
-#include <thread>
-#include <vector>
-#include <mutex>
-#include <set>
-#include <unordered_map>
-
-#include "session.h"
+﻿#include "pch.h"
 #include "npc_session.h"
-#include "game_header.h"
 
 using namespace std;
 
@@ -33,6 +18,7 @@ void InitializeNPC()
 	for (int i = 0; i < NUM_MONSTER; ++i) {
 		int npc_id = MAX_USER + i;
 		npcs[npc_id] = make_shared<NPC_SESSION>(npc_id, "NPC" + std::to_string(i));
+		add_object(npcs[npc_id]->id, npcs[npc_id]->x, npcs[npc_id]->y);
 	}
 	cout << "NPC initialize end.\n";
 }
@@ -68,42 +54,6 @@ void npc_thread_func() {
 		for (auto& it : npcs) {
 			auto& npc = it.second;
 			npc->random_move();
-			//if ((npc->next_move > now)|| (!npc->active)) continue;
-
-			//std::unordered_map<long long, bool> old_seen;
-			//for (auto& u : Characters)
-			//	old_seen[u.first] = u.second->view_list.count(npc->id) > 0;
-
-			//// 랜덤 방향으로 이동
-			//int dir = rand() % 4;
-			//switch (dir) {
-			//case 0: if (npc->y > 0) npc->y--; break;
-			//case 1: if (npc->y < MAP_HEIGHT - 1) npc->y++; break;
-			//case 2: if (npc->x > 0) npc->x--; break;
-			//case 3: if (npc->x < MAP_WIDTH - 1) npc->x++; break;
-			//}
-
-			//for (auto& u : Characters) {
-			//	bool now_seen = u.second->can_see(*npc);
-			//	bool was_seen = old_seen[u.first];
-
-			//	if (now_seen && !was_seen) {
-			//		// ENTER: 처음 보임
-			//		u.second->send_add_player_packet(npc->id);
-			//		u.second->view_list.insert(npc->id);
-			//	}
-			//	else if (!now_seen && was_seen) {
-			//		// LEAVE: 시야에서 나감
-			//		u.second->send_remove_player_packet(npc->id);
-			//		u.second->view_list.erase(npc->id);
-			//	}
-			//	else if (now_seen && was_seen) {
-			//		// MOVE: 여전히 시야 안 (좌표만 update)
-			//		u.second->send_move_player_packet(npc->id);
-			//	}
-			//}
-
-			//npc->next_move = std::chrono::steady_clock::now() + std::chrono::milliseconds(100 + (rand() % 5000));
 		}
 	}
 }

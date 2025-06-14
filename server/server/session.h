@@ -1,6 +1,4 @@
 #pragma once
-#include <set>
-#include <chrono>
 #include "exp_over.h"
 
 enum STATE { EMPTY, CONNECTED, INGAME };
@@ -20,7 +18,7 @@ public:
 	unsigned char remained;
 	unsigned char recv_buffer[MAX_CHAT_LENGTH];
 
-	std::set<int> view_list;
+	std::set<long long> view_list;
 
 public:
 	SESSION() : id(0), name(), x(0), y(0), max_hp(0), hp(0), level(0), exp(0),
