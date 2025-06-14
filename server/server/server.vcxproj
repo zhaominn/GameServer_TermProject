@@ -127,9 +127,11 @@
     <ClInclude Include="game_header.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="npc_session.h" />
     <ClInclude Include="session.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="npc_session.cpp" />
     <ClCompile Include="server.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>

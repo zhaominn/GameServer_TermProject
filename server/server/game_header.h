@@ -37,6 +37,9 @@ constexpr unsigned int WINDOW_SIZE = 840;
 constexpr int WINDOW_CENTER = 10;
 
 constexpr unsigned short VIEW_RANGE = 7;
+const int SECTOR_SIZE = 15;
+const int SECTOR_W = MAP_WIDTH / SECTOR_SIZE + 1;
+const int SECTOR_H = MAP_HEIGHT / SECTOR_SIZE + 1;
 
 constexpr unsigned short NPC_MAX_HP = 100;
 

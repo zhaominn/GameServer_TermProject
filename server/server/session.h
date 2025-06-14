@@ -48,39 +48,3 @@ public:
 
 	bool can_see(const SESSION& other) const;
 };
-
-class NPC_SESSION : public SESSION {
-public:
-	bool active;
-	std::chrono::steady_clock::time_point next_move;
-
-	NPC_SESSION() = default;
-
-	NPC_SESSION(int id, std::string name) {
-		this->id = id;
-		this->name = name;
-		x = rand() % MAP_WIDTH;
-		y = rand() % MAP_HEIGHT;
-		max_hp = NPC_MAX_HP;
-		hp = NPC_MAX_HP;
-		level = 0;
-		exp = 0;
-		state = INGAME;
-		active = false;
-		next_move = std::chrono::steady_clock::now() + std::chrono::milliseconds(100 + (rand() % 5000))
-	}
-
-	void send_enter_packet(SESSION *session) {
-		sc_packet_enter packet;
-		packet.size = sizeof(packet);
-		packet.type = S2C_P_ENTER;
-		packet.id = id;
-		strncpy_s(packet.name, sizeof(packet.name), name.c_str(), _TRUNCATE);
-		packet.name[sizeof(packet.name) - 1] = 0;
-		packet.o_type = 1; // NPC
-		packet.x = x;
-		packet.y = y;
-
-		session->send_packet(&packet);
-	}
-};

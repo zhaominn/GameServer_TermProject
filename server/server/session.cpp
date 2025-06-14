@@ -1,5 +1,6 @@
 #include <iostream>
 #include <set>
+#include <unordered_set>
 
 #include <WS2tcpip.h>
 #include <MSWSock.h>
@@ -9,10 +10,15 @@
 #include <unordered_map>
 
 #include "session.h"
+#include "npc_session.h"
 #include "game_header.h"
 
 extern std::unordered_map<long long, std::shared_ptr<SESSION>> Characters;
 extern std::unordered_map<long long, std::shared_ptr<NPC_SESSION>> npcs;
+
+std::unordered_set<long long> sectors[SECTOR_W][SECTOR_H];
+inline int get_sector_x(int x) { return x / SECTOR_SIZE; }
+inline int get_sector_y(int y) { return y / SECTOR_SIZE; }
 
 SESSION::SESSION(long long session_id, SOCKET s) : id(session_id), socket(s)
 {
@@ -195,10 +201,10 @@ void SESSION::process_packet(unsigned char* p)
 	{
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(p);
 		switch (packet->direction) {
-		case MOVE_UP: if (y > 0) y = y - 1; break;
-		case MOVE_DOWN: if (y < (MAP_HEIGHT - 1)) y = y + 1; break;
-		case MOVE_LEFT: if (x > 0) x = x - 1; break;
-		case MOVE_RIGHT:if (x < (MAP_WIDTH - 1)) x = x + 1; break;
+		case MOVE_UP: if (y > 0) --y; break;
+		case MOVE_DOWN: if (y < (MAP_HEIGHT - 1)) ++y; break;
+		case MOVE_LEFT: if (x > 0) --x; break;
+		case MOVE_RIGHT:if (x < (MAP_WIDTH - 1)) ++x; break;
 		}
 
 		std::set<int> near_list;
