@@ -42,6 +42,7 @@ SOCKET my_socket;
 bool key[4] = { false, false, false, false };
 Character player;
 unordered_map<INT, Character> Characters;
+unordered_map<INT, Character> npcs;
 
 atomic<bool> network_running{ true };
 thread network_thread;
@@ -102,7 +103,15 @@ void process_packet(char* ptr)
 			player.name[MAX_ID_LENGTH - 1] = '\0';
 			player.can_see = true;
 		}
-		else if (id < MAX_USER) {
+		else if (packet->o_type == 1) { // ★★★ NPC 구분
+			npcs[id].x = packet->x;
+			npcs[id].y = packet->y;
+			npcs[id].id = id;
+			strncpy_s(npcs[id].name, packet->name, MAX_ID_LENGTH);
+			npcs[id].name[MAX_ID_LENGTH - 1] = '\0';
+			npcs[id].can_see = true;
+		}
+		else {
 			Characters[id].x = packet->x;
 			Characters[id].y = packet->y;
 			Characters[id].id = id;
@@ -118,13 +127,17 @@ void process_packet(char* ptr)
 		sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
 		int other_id = packet->id;
 
-		if (other_id < MAX_USER) {
+		if (other_id == player.id) {
+			player.x = packet->x;
+			player.y = packet->y;
+		}
+		else if (npcs.count(other_id)) {  // NPC 이동
+			npcs[other_id].x = packet->x;
+			npcs[other_id].y = packet->y;
+		}
+		else if (Characters.count(other_id)) { // 플레이어 이동
 			Characters[other_id].x = packet->x;
 			Characters[other_id].y = packet->y;
-			if (player.id == packet->id) {
-				player.x = packet->x;
-				player.y = packet->y;
-			}
 		}
 		break;
 	}
@@ -133,7 +146,13 @@ void process_packet(char* ptr)
 	{
 		sc_packet_leave* packet = reinterpret_cast<sc_packet_leave*>(ptr);
 		int other_id = packet->id;
-		if (other_id < MAX_USER) {
+		if (other_id == player.id) {
+			player.can_see = false;
+		}
+		else if (npcs.count(other_id)) { // NPC 나감
+			npcs[other_id].can_see = false;
+		}
+		else if (Characters.count(other_id)) { // 플레이어 나감
 			Characters[other_id].can_see = false;
 		}
 		break;
@@ -281,6 +300,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			TextOut(memDC, TILE_SIZE * WINDOW_CENTER, TILE_SIZE * WINDOW_CENTER - 20, szName, wcslen(szName));
 
 			for (auto& p : Characters) {
+				const Character& ch = p.second;
+				if (!ch.can_see) continue;
+
+				int offset_x = ch.x - player.x;
+				int offset_y = ch.y - player.y;
+				int draw_x = TILE_SIZE * (WINDOW_CENTER + offset_x);
+				int draw_y = TILE_SIZE * (WINDOW_CENTER + offset_y);
+
+				NinjaDark.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
+					(ch.dir - 1) * TILE_SIZE, ch.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+
+				MultiByteToWideChar(CP_ACP, 0, ch.name, -1, szName, 32);
+				TextOut(memDC, draw_x, draw_y - 20, szName, wcslen(szName));
+			}
+
+			for (auto& p : npcs) {
 				const Character& ch = p.second;
 				if (!ch.can_see) continue;
 

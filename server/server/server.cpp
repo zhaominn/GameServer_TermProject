@@ -20,7 +20,8 @@ using namespace std;
 unordered_map<long long, shared_ptr<SESSION>> Characters;
 unordered_map<long long, shared_ptr<NPC_SESSION>> npcs;
 
-std::atomic<long long> global_new_id = 0;
+atomic<long long> global_new_id = 0;
+atomic<bool> npc_running = true;
 
 SOCKET s_socket;
 mutex m_characters;
@@ -29,7 +30,7 @@ void InitializeNPC()
 {
 	cout << "NPC intialize begin.\n";
 	for (int i = 0; i < NUM_MONSTER; ++i) {
-		npcs[i] = make_shared<NPC_SESSION>(i, "NPC" + std::to_string(i));
+		npcs[i] = make_shared<NPC_SESSION>(MAX_USER+i, "NPC" + std::to_string(i));
 	}
 	cout << "NPC initialize end.\n";
 }

@@ -42,6 +42,8 @@ public:
 
 class NPC_SESSION : public SESSION {
 public:
+	bool active;
+
 	NPC_SESSION() = default;
 
 	NPC_SESSION(int id, std::string name) {
@@ -54,6 +56,7 @@ public:
 		this->level = 0;
 		this->exp = 0;
 		this->state = INGAME;
+		this->active = false;
 	}
 
 	void send_enter_packet(SESSION *session) {
