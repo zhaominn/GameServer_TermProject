@@ -47,6 +47,8 @@ public:
 
 	virtual void take_damage(int damage, long long attacker_id);
 
+	virtual void give_damage(SESSION* target, int damage);
+
 	void process_packet(unsigned char* p);
 
 	bool can_see(const SESSION& other) const;

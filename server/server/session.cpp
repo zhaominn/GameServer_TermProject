@@ -170,11 +170,23 @@ void SESSION::send_state_change_packet() {
 }
 
 void SESSION::take_damage(int damage, long long attacker_id = 0) {
-	int old_hp = hp;
 	hp -= damage;
 	if (hp < 0) hp = 0;
 
-	// printf("[DEBUG] take_damage: id=%lld, hp=%d -> %d\n", id, old_hp, hp);
+	send_state_change_packet();
+}
+
+void SESSION::give_damage(SESSION* target, int damage) {
+	printf("[%s] -> [%s] (id:%lld) : %d 데미지를 주고 10의 경험치를 얻었습니다.\n",
+		name.c_str(), target->name.c_str(), target->id, damage);
+
+	target->take_damage(damage);
+	exp += 10;
+	if (exp >= level * 100) {
+		++level;
+		printf("[%s] %d레벨로 레벨업하고 %d의 hp를 얻었습니다.\n", name.c_str(), level,level*10);
+		hp += level * 10;
+	}
 	send_state_change_packet();
 }
 
@@ -220,7 +232,7 @@ void SESSION::process_packet(unsigned char* p)
 		}
 
 		for (auto& p : obstacles) {
-			if (can_see_obstacle(p.second->x, p.second->y)) { // (can_see 로직에 장애물 조건 포함)
+			if (can_see_obstacle(p.second->x, p.second->y)) {
 				view_list.insert(p.second->id);
 				send_add_player_packet(p.second->id);
 			}
@@ -239,7 +251,6 @@ void SESSION::process_packet(unsigned char* p)
 	}
 	case C2S_P_MOVE:
 	{
-		// printf("[DEBUG] C2S_P_MOVE 진입: id=%lld, old_x=%d, old_y=%d\n", id, x, y);
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(p);
 		short old_x = x; short old_y = y;
 
@@ -264,8 +275,6 @@ void SESSION::process_packet(unsigned char* p)
 			y = old_y;
 			break;
 		}
-
-		// printf("[DEBUG] move_object: id=%lld, from=(%d,%d) to=(%d,%d)\n", id, old_x, old_y, x, y);
 
 		std::set<long long> candidate_ids;
 		get_aoi_candidates(x, y, candidate_ids);
@@ -292,25 +301,23 @@ void SESSION::process_packet(unsigned char* p)
 			bool is_new = (old_vlist.count(nl) == 0);
 
 			if (nl < MAX_USER) {
-				// 플레이어: 내 시야에 새로 들어온 상태
 				if (Characters.count(nl) && Characters[nl]->view_list.count(id)) {
-					Characters[nl]->send_move_player_packet(id); // 그쪽에서 나의 움직임도 알림
+					Characters[nl]->send_move_player_packet(id);
 				}
 			}
 			else if (nl < MAX_USER + NUM_MONSTER) {
-				// NPC: 처음 내 시야에 들어왔다면 active 켜주기
 				if (is_new && npcs.count(nl))
 					npcs[nl]->active = true;
 			}
 			if (is_new)
-				send_add_player_packet(nl); // 내 클라에 엔터 패킷
+				send_add_player_packet(nl);
 		}
 
 		for (auto ol : old_vlist) {
 			if (near_list.count(ol) == 0) {
-				send_remove_player_packet(ol); // 내 클라에서 엔피씨/플레이어 감추기
+				send_remove_player_packet(ol);
 				if (ol < MAX_USER && Characters.count(ol)) {
-					Characters[ol]->send_remove_player_packet(id); // 상대도 내 퇴장 감지
+					Characters[ol]->send_remove_player_packet(id);
 				}
 			}
 		}
@@ -323,7 +330,8 @@ void SESSION::process_packet(unsigned char* p)
 		const static int dx[] = { 0, 0, -1, 1 };
 		const static int dy[] = { -1, 1, 0, 0 };
 
-		bool attack_success = false;
+		long long exp_gain_target_id = -1;
+		std::string exp_gain_target_name = "";
 
 		for (int dir = 0; dir < 4; ++dir) {
 			int tx = x + dx[dir];
@@ -331,13 +339,10 @@ void SESSION::process_packet(unsigned char* p)
 
 			if (tx < 0 || tx >= MAP_WIDTH || ty < 0 || ty >= MAP_HEIGHT)
 				continue;
+
 			for (auto it = Characters.begin(); it != Characters.end(); ) {
 				if (it->second->x == tx && it->second->y == ty) {
-					printf("[플레이어] %s -> [플레이어] %s (id:%lld) : %d 데미지!\n",
-						name.c_str(), it->second->name.c_str(), it->first, ATTACK_POWER);
-
-					it->second->take_damage(ATTACK_POWER);
-					attack_success = true;
+					give_damage(it->second.get(), ATTACK_POWER);
 					break;
 				}
 				else {
@@ -346,11 +351,7 @@ void SESSION::process_packet(unsigned char* p)
 			}
 			for (auto it = npcs.begin(); it != npcs.end(); ) {
 				if (it->second->x == tx && it->second->y == ty) {
-					printf("[플레이어] %s -> [NPC] %s (id:%lld) : %d 데미지!\n",
-						name.c_str(), it->second->name.c_str(), it->first, ATTACK_POWER);
-
-					it->second->take_damage(ATTACK_POWER, id);
-					attack_success = true;
+					give_damage(it->second.get(), ATTACK_POWER);
 					break;
 				}
 				else {
@@ -359,12 +360,6 @@ void SESSION::process_packet(unsigned char* p)
 			}
 
 		}
-
-		if (attack_success) {
-			exp += 10;
-			send_state_change_packet();
-		}
-
 		break;
 	}
 	default:

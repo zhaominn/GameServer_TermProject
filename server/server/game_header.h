@@ -43,7 +43,7 @@ constexpr unsigned short PLAYER_MAX_HP = 200;
 constexpr unsigned short NPC_MAX_HP = 100;
 constexpr unsigned short ATTACK_POWER = 24;
 
-constexpr unsigned int UI_WIDTH = 400;
+constexpr unsigned int UI_WIDTH = 150;
 constexpr unsigned int TOTAL_WIN_W = WINDOW_SIZE + UI_WIDTH + 15;
 
 constexpr int UI_LEFT = WINDOW_SIZE + 20;

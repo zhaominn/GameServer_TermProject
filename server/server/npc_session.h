@@ -21,5 +21,7 @@ public:
 
 	void take_damage(int damage, long long attacker_id) override;
 
+	void give_damage(SESSION* target,int damage) override;
+
 	void remove_npc();
 };

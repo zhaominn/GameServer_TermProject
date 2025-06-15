@@ -107,9 +107,7 @@ void NPC_SESSION::npc_move() {
 			auto target = Characters[chase_target_id];
 			int nx = x, ny = y;
 			if (abs(target->x - x) + abs(target->y - y) == 1) {
-				printf("[NPC] %s -> [플레이어] %s (id:%lld) : %d 데미지!\n",
-					name.c_str(), target->name.c_str(), target->id, ATTACK_POWER);
-				target->take_damage(ATTACK_POWER, id);
+				give_damage(target.get(), ATTACK_POWER);
 
 				next_move = now + std::chrono::milliseconds(200 + rand() % 500);
 				return;
@@ -167,9 +165,7 @@ void NPC_SESSION::npc_move() {
 			int dy = target->y - y;
 
 			if (abs(dx) + abs(dy) == 1) {
-				printf("[NPC] %s -> [플레이어] %s (id:%lld) : %d 데미지!\n",
-					name.c_str(), target->name.c_str(), target->id, ATTACK_POWER);
-				target->take_damage(ATTACK_POWER, id);
+				give_damage(target.get(), ATTACK_POWER);
 
 				next_move = now + std::chrono::milliseconds(200 + rand() % 500);
 				return;
@@ -233,31 +229,23 @@ void NPC_SESSION::npc_move() {
 	next_move = std::chrono::steady_clock::now() + std::chrono::milliseconds(100 + (rand() % 5000));
 }
 
+
 void NPC_SESSION::take_damage(int damage, long long attacker_id) {
 	hp -= damage;
 	if (hp < 0) hp = 0;
-	send_state_change_packet();
-	if (hp == 0) remove_npc();
-	else if (npc_type == 1 && !chasing && Characters.count(attacker_id)) {
+
+if (npc_type == 1 && !chasing && Characters.count(attacker_id)) {
 		chasing = true;
 		chase_target_id = attacker_id;
 	}
+	send_state_change_packet();
 }
 
-void NPC_SESSION::remove_npc() {
-	sc_packet_leave packet;
-	packet.size = sizeof(packet);
-	packet.type = S2C_P_LEAVE;
-	packet.id = id;
+void NPC_SESSION::give_damage(SESSION* target, int damage) {
+	printf("[%s]  -> [%s] (id:%lld) : %d 데미지를 주었습니다.\n",
+		name.c_str(),  target->name.c_str(), target->id, damage);
 
-	for (auto& c : Characters) {
-		if (c.second->view_list.count(id)) {
-			c.second->send_packet(&packet);
-			c.second->view_list.erase(id);
-		}
-	}
-
-	remove_object(id, x, y);
-
-	npcs.erase(id);
+	target->take_damage(damage,id);
+	send_state_change_packet();
 }
+
