@@ -42,6 +42,10 @@ public:
 
 	void send_remove_player_packet(int target_id);
 
+	void send_state_change_packet();
+
+	virtual void take_damage(int amount);
+
 	void process_packet(unsigned char* p);
 
 	bool can_see(const SESSION& other) const;

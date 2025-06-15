@@ -120,7 +120,7 @@ void SESSION::send_add_player_packet(int target_id) {
 		packet.x = t->x;
 		packet.y = t->y;
 	}
-	else if(target_id<MAX_USER+NUM_MONSTER){
+	else if (target_id < MAX_USER + NUM_MONSTER) {
 		if (!npcs.count(target_id)) return;
 		auto& n = npcs[target_id];
 		strncpy_s(packet.name, n->name.c_str(), MAX_ID_LENGTH);
@@ -142,11 +142,34 @@ void SESSION::send_add_player_packet(int target_id) {
 }
 
 void SESSION::send_remove_player_packet(int target_id) {
+	// printf("[DEBUG] send_remove_player_packet: target_id=%lld, by_id=%lld\n", target_id, id);
+
 	sc_packet_leave packet;
 	packet.size = sizeof(packet);
 	packet.type = S2C_P_LEAVE;
 	packet.id = target_id;
 	send_packet(&packet);
+}
+
+void SESSION::send_state_change_packet() {
+	sc_packet_stat_change p;
+	p.size = sizeof(p);
+	p.type = S2C_P_STAT_CHANGE;
+	p.id = id;
+	p.hp = hp;
+	p.level = level;
+	p.exp = exp;
+
+	send_packet(&p);
+}
+
+void SESSION::take_damage(int amount) {
+	int old_hp = hp;
+	hp -= amount;
+	if (hp < 0) hp = 0;
+
+	// printf("[DEBUG] take_damage: id=%lld, hp=%d -> %d\n", id, old_hp, hp);
+	send_state_change_packet();
 }
 
 void SESSION::process_packet(unsigned char* p)
@@ -158,7 +181,10 @@ void SESSION::process_packet(unsigned char* p)
 		cs_packet_login* packet = reinterpret_cast<cs_packet_login*>(p);
 		name = packet->name;
 		x = rand() % MAP_WIDTH;
-		y = rand() % MAP_HEIGHT;
+		y = rand() % MAP_HEIGHT;;
+		level = 0;
+		hp = PLAYER_MAX_HP;
+		exp = 0;
 		printf("client[%lld] %s login\n", id, name.c_str());
 		send_player_info();
 
@@ -188,7 +214,7 @@ void SESSION::process_packet(unsigned char* p)
 		}
 
 		for (auto& p : obstacles) {
-			if (can_see_obstacle(p.second->x,p.second->y)) { // (can_see 로직에 장애물 조건 포함)
+			if (can_see_obstacle(p.second->x, p.second->y)) { // (can_see 로직에 장애물 조건 포함)
 				view_list.insert(p.second->id);
 				send_add_player_packet(p.second->id);
 			}
@@ -207,6 +233,7 @@ void SESSION::process_packet(unsigned char* p)
 	}
 	case C2S_P_MOVE:
 	{
+		// printf("[DEBUG] C2S_P_MOVE 진입: id=%lld, old_x=%d, old_y=%d\n", id, x, y);
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(p);
 		short old_x = x; short old_y = y;
 
@@ -218,7 +245,7 @@ void SESSION::process_packet(unsigned char* p)
 		}
 
 		bool blocked = false;
-		for (auto id : sectors[x/SECTOR_SIZE][y/ SECTOR_SIZE]) {
+		for (auto id : sectors[x / SECTOR_SIZE][y / SECTOR_SIZE]) {
 			if (id >= MAX_USER + NUM_MONSTER) { // 장애물 id
 				if (obstacles.count(id) && obstacles[id]->x == x && obstacles[id]->y == y) {
 					blocked = true;
@@ -229,8 +256,10 @@ void SESSION::process_packet(unsigned char* p)
 		if (blocked) {
 			x = old_x;
 			y = old_y;
-			break; 
+			break;
 		}
+
+		// printf("[DEBUG] move_object: id=%lld, from=(%d,%d) to=(%d,%d)\n", id, old_x, old_y, x, y);
 
 		std::set<long long> candidate_ids;
 		get_aoi_candidates(x, y, candidate_ids);
@@ -245,7 +274,7 @@ void SESSION::process_packet(unsigned char* p)
 			else if (npcs.count(id) && can_see(*npcs[id])) {
 				near_list.insert(id);
 			}
-			else if (obstacles.count(id) && can_see_obstacle(obstacles[id]->x,obstacles[id]->y)) {
+			else if (obstacles.count(id) && can_see_obstacle(obstacles[id]->x, obstacles[id]->y)) {
 				near_list.insert(id);
 			}
 		}
@@ -262,7 +291,7 @@ void SESSION::process_packet(unsigned char* p)
 					Characters[nl]->send_move_player_packet(id); // 그쪽에서 나의 움직임도 알림
 				}
 			}
-			else if(nl < MAX_USER+ NUM_MONSTER){
+			else if (nl < MAX_USER + NUM_MONSTER) {
 				// NPC: 처음 내 시야에 들어왔다면 active 켜주기
 				if (is_new && npcs.count(nl))
 					npcs[nl]->active = true;
@@ -281,6 +310,54 @@ void SESSION::process_packet(unsigned char* p)
 		}
 
 		view_list = std::move(near_list);
+
+		break;
+	}
+	case C2S_P_ATTACK: {
+		const static int dx[] = { 0, 0, -1, 1 };
+		const static int dy[] = { -1, 1, 0, 0 };
+
+		bool attack_success = false;
+
+		for (int dir = 0; dir < 4; ++dir) {
+			int tx = x + dx[dir];
+			int ty = y + dy[dir];
+
+			if (tx < 0 || tx >= MAP_WIDTH || ty < 0 || ty >= MAP_HEIGHT)
+				continue;
+			for (auto it = Characters.begin(); it != Characters.end(); ) {
+				if (it->second->x == tx && it->second->y == ty) {
+					printf("[플레이어] %s -> [플레이어] %s (id:%lld) : %d 데미지!\n",
+						name.c_str(), it->second->name.c_str(), it->first, ATTACK_POWER);
+
+					it->second->take_damage(ATTACK_POWER);
+					attack_success = true;
+					break;
+				}
+				else {
+					++it;
+				}
+			}
+			for (auto it = npcs.begin(); it != npcs.end(); ) {
+				if (it->second->x == tx && it->second->y == ty) {
+					printf("[플레이어] %s -> [NPC] %s (id:%lld) : %d 데미지!\n",
+						name.c_str(), it->second->name.c_str(), it->first, ATTACK_POWER);
+
+					it->second->take_damage(ATTACK_POWER);
+					attack_success = true;
+					break;
+				}
+				else {
+					++it;
+				}
+			}
+
+		}
+
+		if (attack_success) {
+			exp += 10;
+			send_state_change_packet();
+		}
 
 		break;
 	}

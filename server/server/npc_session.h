@@ -14,4 +14,8 @@ public:
 	void send_enter_packet(SESSION* session);
 
 	void random_move();
+
+    void take_damage(int damage) override;
+
+	void remove_npc();
 };

@@ -3,14 +3,14 @@
   "WorkspaceRootPath": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\client\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{0C581F72-8692-4EA1-898D-53E603F87E5E}|client\\client.vcxproj|C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\client\\client\\client.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0C581F72-8692-4EA1-898D-53E603F87E5E}|client\\client.vcxproj|solutionrelative:client\\client.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{0C581F72-8692-4EA1-898D-53E603F87E5E}|client\\client.vcxproj|C:\\USERS\\SOMIN\\ONEDRIVE\\GAMESERVER_TERMPROJECT\\SERVER\\SERVER\\GAME_HEADER.H||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0C581F72-8692-4EA1-898D-53E603F87E5E}|client\\client.vcxproj|C:\\PROGRAM FILES\\MICROSOFT VISUAL STUDIO\\2022\\COMMUNITY\\VC\\TOOLS\\MSVC\\14.44.35207\\INCLUDE\\UTILITY||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0C581F72-8692-4EA1-898D-53E603F87E5E}|client\\client.vcxproj|C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\client\\client\\client.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{0C581F72-8692-4EA1-898D-53E603F87E5E}|client\\client.vcxproj|solutionrelative:client\\client.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -20,7 +20,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -28,7 +28,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "utility",
               "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\include\\utility",
               "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\include\\utility",
@@ -40,28 +40,29 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "game_header.h",
               "DocumentMoniker": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\game_header.h",
               "RelativeDocumentMoniker": "..\\server\\server\\game_header.h",
               "ToolTip": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\game_header.h",
               "RelativeToolTip": "..\\server\\server\\game_header.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAfAAAAAAAAAA==",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAAGcAAAALAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-06-14T19:14:06.32Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "client.cpp",
               "DocumentMoniker": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\client\\client\\client.cpp",
               "RelativeDocumentMoniker": "client\\client.cpp",
               "ToolTip": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\client\\client\\client.cpp",
               "RelativeToolTip": "client\\client.cpp",
-              "ViewState": "AgIAAD0BAAAAAAAAAAAYwG4BAAAtAAAAAAAAAA==",
+              "ViewState": "AgIAABEBAAAAAAAAAAAIwC4BAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-06-08T08:39:31.028Z"
+              "WhenOpened": "2025-06-08T08:39:31.028Z",
+              "EditorCaption": ""
             }
           ]
         },

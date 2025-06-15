@@ -22,13 +22,17 @@ int id_len = 0;
 
 class Character {
 public:
+	long long id{};
 	short x;
 	short y;
+	short hp;
+	short level;
+	int   exp;
+
 	int dir;
 	int frame;
 	bool can_see;
 	char name[MAX_ID_LENGTH]{};
-	long long id{};
 
 	Character() {
 		dir = MOVE_DOWN;
@@ -40,6 +44,7 @@ public:
 
 SOCKET my_socket;
 bool key[4] = { false, false, false, false };
+bool attack = false;
 Character player;
 unordered_map<INT, Character> Characters;
 unordered_map<INT, Character> npcs;
@@ -99,6 +104,9 @@ void process_packet(char* ptr)
 		player.id = packet->id;
 		player.x = packet->x;
 		player.y = packet->y;
+		player.hp = packet->hp;
+		player.level = packet->level;
+		player.exp = packet->exp;
 		player.can_see = true;
 		break;
 	}
@@ -163,6 +171,49 @@ void process_packet(char* ptr)
 		}
 		break;
 	}
+	case S2C_P_STAT_CHANGE: {
+		sc_packet_stat_change* pkt = reinterpret_cast<sc_packet_stat_change*>(ptr);
+		long long id = pkt->id;
+		short   hp = pkt->hp;
+		short   level = pkt->level;
+		int     exp = pkt->exp;
+
+		if (id == player.id) {
+			// 나 자신(플레이어)이면 내 상태를 갱신
+			player.hp = hp;
+			player.level = level;
+			player.exp = exp;
+
+			// 사망 체크
+			if (player.hp <= 0) {
+				// ★ 소켓 종료/종료 처리
+				closesocket(my_socket);
+				// 또는 exit(0); 혹은 사망UI 등
+			}
+		}
+		else if (npcs.count(id)) {
+			// NPC면 NPC 상태 갱신
+			npcs[id].hp = hp;
+			npcs[id].level = level;
+			npcs[id].exp = exp;
+			// 사망 처리
+			if (npcs[id].hp <= 0) {
+				npcs.erase(id);  // 사망 시 삭제
+				// ++ 에니메이션, 이펙트 등 부가 처리 가능
+			}
+		}
+		else if (Characters.count(id)) {
+			// 타 플레이어 상태 갱신
+			Characters[id].hp = hp;
+			Characters[id].level = level;
+			Characters[id].exp = exp;
+			if (Characters[id].hp <= 0) {
+				Characters.erase(id); // 사망/퇴장 처리
+			}
+		}
+		break;
+	}
+
 	case S2C_P_LEAVE:
 	{
 		sc_packet_leave* packet = reinterpret_cast<sc_packet_leave*>(ptr);
@@ -363,7 +414,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				int draw_x = TILE_SIZE * (WINDOW_CENTER + offset_x);
 				int draw_y = TILE_SIZE * (WINDOW_CENTER + offset_y);
 
-				Rock.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE, 
+				Rock.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
 					0, 0 * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 
 			}
@@ -410,32 +461,39 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 	case WM_KEYDOWN:
 	{
-		switch (wParam) {
-		case VK_UP: case 'w': case'W': key[0] = true; player.dir = MOVE_UP; break;
-		case VK_LEFT: case'a': case'A': key[1] = true; player.dir = MOVE_LEFT; break;
-		case VK_DOWN: case's': case'S': key[2] = true; player.dir = MOVE_DOWN; break;
-		case VK_RIGHT: case'd': case'D': key[3] = true; player.dir = MOVE_RIGHT; break;
-		case 'Q': PostQuitMessage(0); break;
-		default: break;
+		if (make_id) {
+			switch (wParam) {
+			case VK_UP: case 'w': case'W': key[0] = true; player.dir = MOVE_UP; break;
+			case VK_LEFT: case'a': case'A': key[1] = true; player.dir = MOVE_LEFT; break;
+			case VK_DOWN: case's': case'S': key[2] = true; player.dir = MOVE_DOWN; break;
+			case VK_RIGHT: case'd': case'D': key[3] = true; player.dir = MOVE_RIGHT; break;
+			case 'r': case'R': attack = true; break;
+			case 'Q': PostQuitMessage(0); break;
+			default: break;
+			}
 		}
 		break;
 	}
 	case WM_KEYUP:
 	{
-		switch (wParam) {
-		case VK_UP: case 'w': case'W': key[0] = false; break;
-		case VK_LEFT: case'a': case'A': key[1] = false; break;
-		case VK_DOWN: case's': case'S': key[2] = false; break;
-		case VK_RIGHT: case'd': case'D': key[3] = false; break;
-		case 'Q': PostQuitMessage(0); break;
-		default: break;
+		if (make_id) {
+			switch (wParam) {
+			case VK_UP: case 'w': case'W': key[0] = false; break;
+			case VK_LEFT: case'a': case'A': key[1] = false; break;
+			case VK_DOWN: case's': case'S': key[2] = false; break;
+			case VK_RIGHT: case'd': case'D': key[3] = false; break;
+			case 'r': case'R': attack = false; break;
+			case 'Q': PostQuitMessage(0); break;
+			default: break;
+			}
 		}
 		break;
 	}
 	case WM_TIMER:
 	{
-		if (wParam == 1) {
+		if (wParam == 1&& make_id) {
 			static auto last_move_time = chrono::steady_clock::now();
+			static auto last_attack_time = chrono::steady_clock::now();
 
 			if ((key[0] || key[1] || key[2] || key[3])
 				&& (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - last_move_time).count() >= MOVE_DELAY_MS)) {
@@ -447,6 +505,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				send_packet(&p);
 
 				last_move_time = chrono::steady_clock::now();
+			}
+			if (attack
+				&& (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - last_attack_time).count() >= ATTACK_DELAY_MS)) {
+				cs_packet_attack p;
+				p.size = sizeof(p);
+				p.type = C2S_P_ATTACK;
+				send_packet(&p);
+
+				last_attack_time = chrono::steady_clock::now();
 			}
 		}
 		InvalidateRect(hWnd, NULL, FALSE);

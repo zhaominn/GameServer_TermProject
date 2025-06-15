@@ -31,6 +31,7 @@ constexpr char MOVE_DOWN = 2;
 constexpr char MOVE_LEFT = 3;
 constexpr char MOVE_RIGHT = 4; 
 constexpr unsigned short MOVE_DELAY_MS = 400; // 1초로조정해놔야하늬니라
+constexpr unsigned short ATTACK_DELAY_MS = 200; // 1초로조정해놔야하늬니라
 
 constexpr unsigned short MAP_HEIGHT = 2000;
 constexpr unsigned short MAP_WIDTH = 2000;
@@ -43,7 +44,9 @@ const int SECTOR_SIZE = 15;
 const int SECTOR_W = MAP_WIDTH / SECTOR_SIZE + 1;
 const int SECTOR_H = MAP_HEIGHT / SECTOR_SIZE + 1;
 
+constexpr unsigned short PLAYER_MAX_HP = 200;
 constexpr unsigned short NPC_MAX_HP = 100;
+constexpr unsigned short ATTACK_POWER = 24;
 
 #pragma pack (push, 1)
 

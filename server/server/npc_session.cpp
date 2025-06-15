@@ -2,6 +2,7 @@
 #include "npc_session.h"
 
 extern std::unordered_map<long long, std::shared_ptr<SESSION>> Characters;
+extern std::unordered_map<long long, std::shared_ptr<NPC_SESSION>> npcs;
 extern std::unordered_map<long long, std::shared_ptr<Obstacle>> obstacles;
 extern std::unordered_set<long long> sectors[SECTOR_W][SECTOR_H];
 
@@ -88,4 +89,33 @@ void NPC_SESSION::random_move() {
 	}
 
 	next_move = std::chrono::steady_clock::now() + std::chrono::milliseconds(100 + (rand() % 5000));
+}
+
+void NPC_SESSION::take_damage(int damage) {
+	hp -= damage;
+	if (hp < 0) hp = 0;
+
+	send_state_change_packet();
+
+	if (hp == 0) {
+		remove_npc();
+	}
+}
+
+void NPC_SESSION::remove_npc() {
+	sc_packet_leave packet;
+	packet.size = sizeof(packet);
+	packet.type = S2C_P_LEAVE;
+	packet.id = id;
+
+	for (auto& c : Characters) {
+		if (c.second->view_list.count(id)) {
+			c.second->send_packet(&packet);
+			c.second->view_list.erase(id);
+		}
+	}
+
+	remove_object(id, x, y);
+
+	npcs.erase(id);
 }
