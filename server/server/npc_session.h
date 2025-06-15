@@ -1,10 +1,12 @@
 #pragma once
 #include "obstacle.h"
 
-
 class NPC_SESSION : public SESSION {
 public:
-	bool active;
+	bool		active;
+	bool		chasing = false;
+	long long	chase_target_id = -1;
+	char		npc_type;
 	std::chrono::steady_clock::time_point next_move;
 
 	NPC_SESSION() = default;
@@ -15,7 +17,9 @@ public:
 
 	void random_move();
 
-    void take_damage(int damage) override;
+	void npc_move();
+
+	void take_damage(int damage, long long attacker_id) override;
 
 	void remove_npc();
 };

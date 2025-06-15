@@ -92,16 +92,22 @@ void SESSION::send_move_player_packet(int target_id) {
 	packet.id = target_id;
 	packet.x = x;
 	packet.y = y;
+	packet.dir = dir;
 
-	if (target_id < MAX_USER) {
+	if (target_id == id) {}
+	else if (target_id < MAX_USER) {
+		if (!Characters.count(target_id)) return;
 		auto& t = Characters[target_id];
 		packet.x = t->x;
 		packet.y = t->y;
+		packet.dir = t->dir;
 	}
-	else {
-		auto& n = npcs[target_id];
-		packet.x = n->x;
-		packet.y = n->y;
+	else if (target_id < MAX_USER + NUM_MONSTER) {
+		if (!npcs.count(target_id)) return;
+		auto& t = npcs[target_id];
+		packet.x = t->x;
+		packet.y = t->y;
+		packet.dir = t->dir;
 	}
 	send_packet(&packet);
 }
@@ -124,7 +130,7 @@ void SESSION::send_add_player_packet(int target_id) {
 		if (!npcs.count(target_id)) return;
 		auto& n = npcs[target_id];
 		strncpy_s(packet.name, n->name.c_str(), MAX_ID_LENGTH);
-		packet.o_type = 1; // NPC
+		packet.o_type = (n->npc_type == 1) ? 1 : 2;
 		packet.x = n->x;
 		packet.y = n->y;
 	}
@@ -132,7 +138,7 @@ void SESSION::send_add_player_packet(int target_id) {
 		if (!obstacles.count(target_id)) return;
 		auto& n = obstacles[target_id];
 		strncpy_s(packet.name, "Rock", MAX_ID_LENGTH);
-		packet.o_type = 2; // Obstacle
+		packet.o_type = 3; // Obstacle
 		packet.x = n->x;
 		packet.y = n->y;
 		packet.rock_num = n->rock_num;
@@ -163,9 +169,9 @@ void SESSION::send_state_change_packet() {
 	send_packet(&p);
 }
 
-void SESSION::take_damage(int amount) {
+void SESSION::take_damage(int damage, long long attacker_id = 0) {
 	int old_hp = hp;
-	hp -= amount;
+	hp -= damage;
 	if (hp < 0) hp = 0;
 
 	// printf("[DEBUG] take_damage: id=%lld, hp=%d -> %d\n", id, old_hp, hp);
@@ -238,10 +244,10 @@ void SESSION::process_packet(unsigned char* p)
 		short old_x = x; short old_y = y;
 
 		switch (packet->direction) {
-		case MOVE_UP: if (y > 0) --y; break;
-		case MOVE_DOWN: if (y < (MAP_HEIGHT - 1)) ++y; break;
-		case MOVE_LEFT: if (x > 0) --x; break;
-		case MOVE_RIGHT:if (x < (MAP_WIDTH - 1)) ++x; break;
+		case MOVE_UP: if (y > 0)					dir = MOVE_UP;		--y; break;
+		case MOVE_DOWN: if (y < (MAP_HEIGHT - 1))	dir = MOVE_DOWN;	++y; break;
+		case MOVE_LEFT: if (x > 0)					dir = MOVE_LEFT;	--x; break;
+		case MOVE_RIGHT:if (x < (MAP_WIDTH - 1))	dir = MOVE_RIGHT;	++x; break;
 		}
 
 		bool blocked = false;
@@ -343,7 +349,7 @@ void SESSION::process_packet(unsigned char* p)
 					printf("[플레이어] %s -> [NPC] %s (id:%lld) : %d 데미지!\n",
 						name.c_str(), it->second->name.c_str(), it->first, ATTACK_POWER);
 
-					it->second->take_damage(ATTACK_POWER);
+					it->second->take_damage(ATTACK_POWER, id);
 					attack_success = true;
 					break;
 				}

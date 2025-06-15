@@ -8,6 +8,7 @@ public:
 	long long id;
 	std::string name;
 	short x, y;
+	char dir;
 	short max_hp;
 	short hp;
 	short level;
@@ -44,7 +45,7 @@ public:
 
 	void send_state_change_packet();
 
-	virtual void take_damage(int amount);
+	virtual void take_damage(int damage, long long attacker_id);
 
 	void process_packet(unsigned char* p);
 

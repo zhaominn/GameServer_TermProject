@@ -28,6 +28,9 @@ public:
 	short hp;
 	short level;
 	int   exp;
+	bool die;
+	int death_draw_tick;
+	char npc_type;
 
 	int dir;
 	int frame;
@@ -38,6 +41,8 @@ public:
 		dir = MOVE_DOWN;
 		frame = 0;
 		can_see = false;
+		die = false;
+		death_draw_tick = 0;
 	}
 
 };
@@ -46,8 +51,11 @@ SOCKET my_socket;
 bool key[4] = { false, false, false, false };
 bool attack = false;
 Character player;
+
 unordered_map<INT, Character> Characters;
 unordered_map<INT, Character> npcs;
+vector<int> dead_npc_ids;
+vector<int> dead_char_ids;
 
 atomic<bool> network_running{ true };
 thread network_thread;
@@ -89,7 +97,6 @@ void logIn() {
 	cs_packet_login packet;
 	packet.size = sizeof(packet);
 	packet.type = C2S_P_LOGIN;
-	// sprintf_s(player.name, "player_%d", _getpid()); // 임시 이름
 	strncpy_s(packet.name, sizeof(packet.name), player.name, _TRUNCATE);
 	send_packet(&packet);
 }
@@ -123,20 +130,30 @@ void process_packet(char* ptr)
 			player.name[MAX_ID_LENGTH - 1] = '\0';
 			player.can_see = true;
 		}
-		else if (packet->o_type == 2) { // 장애물!
-			obstacles[id].id = id;
-			obstacles[id].x = packet->x;
-			obstacles[id].y = packet->y;
-			obstacles[id].rock_num = packet->rock_num;
-			obstacles[id].can_see = true;
-		}
-		else if (packet->o_type == 1) {
+		else if (packet->o_type == 1) { // PEACE MONSTER
 			npcs[id].x = packet->x;
 			npcs[id].y = packet->y;
 			npcs[id].id = id;
 			strncpy_s(npcs[id].name, packet->name, MAX_ID_LENGTH);
 			npcs[id].name[MAX_ID_LENGTH - 1] = '\0';
 			npcs[id].can_see = true;
+			npcs[id].npc_type = 1;
+		}
+		else if (packet->o_type == 2) { // AGRO MONSTER
+			npcs[id].x = packet->x;
+			npcs[id].y = packet->y;
+			npcs[id].id = id;
+			strncpy_s(npcs[id].name, packet->name, MAX_ID_LENGTH);
+			npcs[id].name[MAX_ID_LENGTH - 1] = '\0';
+			npcs[id].can_see = true;
+			npcs[id].npc_type = 2;
+		}
+		else if (packet->o_type == 3) { // 장애물!
+			obstacles[id].id = id;
+			obstacles[id].x = packet->x;
+			obstacles[id].y = packet->y;
+			obstacles[id].rock_num = packet->rock_num;
+			obstacles[id].can_see = true;
 		}
 		else {
 			Characters[id].x = packet->x;
@@ -152,22 +169,24 @@ void process_packet(char* ptr)
 	{
 		sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
 		int other_id = packet->id;
+		char dir = packet->dir;
 
 		if (other_id == player.id) {
 			player.x = packet->x;
 			player.y = packet->y;
-		}
-		else if (obstacles.count(other_id)) {  // 장애물 이동 (움직이는 경우?)
-			obstacles[other_id].x = packet->x;
-			obstacles[other_id].y = packet->y;
+			player.dir = packet->dir;
 		}
 		else if (npcs.count(other_id)) {  // NPC 이동
+			npcs[other_id].frame = (npcs[other_id].frame + 1) % 4;
 			npcs[other_id].x = packet->x;
 			npcs[other_id].y = packet->y;
+			npcs[other_id].dir = packet->dir;
 		}
 		else if (Characters.count(other_id)) { // 플레이어 이동
+			Characters[other_id].frame = (Characters[other_id].frame + 1) % 4;
 			Characters[other_id].x = packet->x;
 			Characters[other_id].y = packet->y;
+			Characters[other_id].dir = packet->dir;
 		}
 		break;
 	}
@@ -179,41 +198,38 @@ void process_packet(char* ptr)
 		int     exp = pkt->exp;
 
 		if (id == player.id) {
-			// 나 자신(플레이어)이면 내 상태를 갱신
 			player.hp = hp;
 			player.level = level;
 			player.exp = exp;
 
-			// 사망 체크
 			if (player.hp <= 0) {
-				// ★ 소켓 종료/종료 처리
-				closesocket(my_socket);
-				// 또는 exit(0); 혹은 사망UI 등
+				player.die = true;
 			}
 		}
 		else if (npcs.count(id)) {
-			// NPC면 NPC 상태 갱신
 			npcs[id].hp = hp;
 			npcs[id].level = level;
 			npcs[id].exp = exp;
-			// 사망 처리
 			if (npcs[id].hp <= 0) {
-				npcs.erase(id);  // 사망 시 삭제
-				// ++ 에니메이션, 이펙트 등 부가 처리 가능
+				npcs[id].die = true;
+				npcs[id].frame = 6;
+				npcs[id].dir = 2;
+				dead_npc_ids.push_back(id);
 			}
 		}
 		else if (Characters.count(id)) {
-			// 타 플레이어 상태 갱신
 			Characters[id].hp = hp;
 			Characters[id].level = level;
 			Characters[id].exp = exp;
 			if (Characters[id].hp <= 0) {
-				Characters.erase(id); // 사망/퇴장 처리
+				Characters[id].die = true;
+				Characters[id].frame = 6;
+				Characters[id].dir = 2;
+				dead_char_ids.push_back(id);
 			}
 		}
 		break;
 	}
-
 	case S2C_P_LEAVE:
 	{
 		sc_packet_leave* packet = reinterpret_cast<sc_packet_leave*>(ptr);
@@ -326,7 +342,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	return msg.wParam;
 }
 
-CImage Ninja, NinjaDark, Background, Rock;
+CImage Ninja, NinjaDark, NinjaRed, Background, Rock;
 CImage backBuffer;
 HFONT hFont;
 
@@ -340,6 +356,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_CREATE: {
 		Ninja.Load(L"img/Ninja.png");
 		NinjaDark.Load(L"img/NinjaDark.png");
+		NinjaRed.Load(L"img/NinjaRed.png");
 		Background.Load(L"img/Grass2.png");
 		Rock.Load(L"img/Rock.png");
 
@@ -368,8 +385,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		if (make_id) {
 			drawBackground(Background, memDC);
 
-			Ninja.Draw(memDC, TILE_SIZE * WINDOW_CENTER, TILE_SIZE * WINDOW_CENTER,
-				TILE_SIZE, TILE_SIZE, (player.dir - 1) * TILE_SIZE, player.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+			Ninja.Draw(memDC, TILE_SIZE * WINDOW_CENTER, TILE_SIZE * WINDOW_CENTER, TILE_SIZE, TILE_SIZE,
+				(player.dir - 1) * TILE_SIZE, player.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 
 			wchar_t szName[32];
 			MultiByteToWideChar(CP_ACP, 0, player.name, -1, szName, 32);
@@ -400,8 +417,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				int draw_x = TILE_SIZE * (WINDOW_CENTER + offset_x);
 				int draw_y = TILE_SIZE * (WINDOW_CENTER + offset_y);
 
-				NinjaDark.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
-					(ch.dir - 1) * TILE_SIZE, ch.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+				if (ch.npc_type == 1)
+					NinjaDark.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
+						(ch.dir - 1) * TILE_SIZE, ch.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+				else if (ch.npc_type == 2)
+					NinjaRed.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
+						(ch.dir - 1) * TILE_SIZE, ch.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 
 				MultiByteToWideChar(CP_ACP, 0, ch.name, -1, szName, 32);
 				TextOut(memDC, draw_x, draw_y - 20, szName, wcslen(szName));
@@ -491,30 +512,61 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	}
 	case WM_TIMER:
 	{
-		if (wParam == 1&& make_id) {
+		if (wParam == 1 && make_id) {
 			static auto last_move_time = chrono::steady_clock::now();
 			static auto last_attack_time = chrono::steady_clock::now();
 
-			if ((key[0] || key[1] || key[2] || key[3])
-				&& (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - last_move_time).count() >= MOVE_DELAY_MS)) {
-				player.frame = (player.frame + 1) % 4;
-				cs_packet_move p;
-				p.size = sizeof(p);
-				p.type = C2S_P_MOVE;
-				p.direction = player.dir;
-				send_packet(&p);
-
-				last_move_time = chrono::steady_clock::now();
+			if (player.die) {
+				if (player.death_draw_tick++ > 10)
+					closesocket(my_socket);
 			}
-			if (attack
-				&& (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - last_attack_time).count() >= ATTACK_DELAY_MS)) {
-				cs_packet_attack p;
-				p.size = sizeof(p);
-				p.type = C2S_P_ATTACK;
-				send_packet(&p);
+			else {
+				if ((key[0] || key[1] || key[2] || key[3])
+					&& (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - last_move_time).count() >= MOVE_DELAY_MS)) {
+					player.frame = (player.frame + 1) % 4;
+					cs_packet_move p;
+					p.size = sizeof(p);
+					p.type = C2S_P_MOVE;
+					p.direction = player.dir;
+					send_packet(&p);
 
-				last_attack_time = chrono::steady_clock::now();
+					last_move_time = chrono::steady_clock::now();
+				}
+				if (attack
+					&& (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - last_attack_time).count() >= ATTACK_DELAY_MS)) {
+					player.frame = (player.frame + 1) % 2 + 4;
+					cs_packet_attack p;
+					p.size = sizeof(p);
+					p.type = C2S_P_ATTACK;
+					send_packet(&p);
+
+					last_attack_time = chrono::steady_clock::now();
+				}
 			}
+
+			for (auto it = dead_npc_ids.begin(); it != dead_npc_ids.end(); ) {
+				int id = *it;
+				if (++npcs[id].death_draw_tick > 5) {
+					npcs.erase(id);
+					it = dead_npc_ids.erase(it);
+				}
+				else {
+					++it;
+				}
+			}
+
+			for (auto it = dead_char_ids.begin(); it != dead_char_ids.end(); ) {
+				int id = *it;
+				if (++Characters[id].death_draw_tick > 5) {
+					Characters.erase(id);
+					it = dead_char_ids.erase(it);
+				}
+				else {
+					++it;
+				}
+			}
+
+
 		}
 		InvalidateRect(hWnd, NULL, FALSE);
 		break;
@@ -523,6 +575,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	{
 		if (!Background.IsNull()) Background.Destroy();
 		if (!Ninja.IsNull()) Ninja.Destroy();
+		if (!NinjaDark.IsNull()) NinjaDark.Destroy();
+		if (!NinjaRed.IsNull()) NinjaRed.Destroy();
 		if (!backBuffer.IsNull()) backBuffer.Destroy();
 
 		if (hFont) { DeleteObject(hFont); hFont = nullptr; }

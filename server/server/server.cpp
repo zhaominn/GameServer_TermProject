@@ -66,7 +66,7 @@ void npc_thread_func() {
 		std::lock_guard<std::mutex> lock(m_characters);
 		for (auto& it : npcs) {
 			auto& npc = it.second;
-			npc->random_move();
+			npc->npc_move();
 		}
 	}
 }

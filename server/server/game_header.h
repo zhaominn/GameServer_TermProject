@@ -29,7 +29,7 @@ constexpr char MAX_ID_LENGTH = 20;
 constexpr char MOVE_UP = 1;
 constexpr char MOVE_DOWN = 2;
 constexpr char MOVE_LEFT = 3;
-constexpr char MOVE_RIGHT = 4; 
+constexpr char MOVE_RIGHT = 4;
 constexpr unsigned short MOVE_DELAY_MS = 400; // 1초로조정해놔야하늬니라
 constexpr unsigned short ATTACK_DELAY_MS = 200; // 1초로조정해놔야하늬니라
 
@@ -66,6 +66,7 @@ struct sc_packet_move {
 	char type;
 	long long id;
 	short x, y;
+	char dir;
 };
 
 struct sc_packet_enter {
@@ -74,8 +75,9 @@ struct sc_packet_enter {
 	long long  id;
 	char name[MAX_ID_LENGTH];
 	char o_type;			// 0 : PLAYER
-							// 1...  : NPC들 
-							// 2 : Obstacle
+	// 1 : PEACE MONSTER
+	// 2 : AGRO MONSTER
+	// 3 : Obstacle
 	short x, y;
 	char rock_num;          // 장애물 종류
 };
