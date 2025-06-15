@@ -2,6 +2,8 @@
 #include "npc_session.h"
 
 extern std::unordered_map<long long, std::shared_ptr<SESSION>> Characters;
+extern std::unordered_map<long long, std::shared_ptr<Obstacle>> obstacles;
+extern std::unordered_set<long long> sectors[SECTOR_W][SECTOR_H];
 
 NPC_SESSION::NPC_SESSION(int id, std::string name) {
 	this->id = id;
@@ -41,11 +43,28 @@ void NPC_SESSION::random_move() {
 
 	// 랜덤 방향으로 이동
 	int dir = rand() % 4;
+	int old_x = x; int old_y = y;
 	switch (dir) {
 	case 0: if (y > 0) --y; break;
 	case 1: if (y < MAP_HEIGHT - 1) ++y; break;
 	case 2: if (x > 0) --x; break;
 	case 3: if (x < MAP_WIDTH - 1) ++x; break;
+	}
+
+	bool blocked = false;
+	for (auto id : sectors[x / SECTOR_SIZE][y / SECTOR_SIZE]) {
+		if (id >= MAX_USER + NUM_MONSTER) { // 장애물 id
+			if (obstacles.count(id) && obstacles[id]->x == x && obstacles[id]->y == y) {
+				blocked = true;
+				break;
+			}
+		}
+	}
+
+	if (blocked) {
+		x = old_x;
+		y = old_y;
+		return;
 	}
 
 	for (auto& u : Characters) {

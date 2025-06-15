@@ -4,8 +4,8 @@
 
 extern std::unordered_map<long long, std::shared_ptr<SESSION>> Characters;
 extern std::unordered_map<long long, std::shared_ptr<NPC_SESSION>> npcs;
-
 extern std::unordered_map<long long, std::shared_ptr<Obstacle>> obstacles;
+extern std::unordered_set<long long> sectors[SECTOR_W][SECTOR_H];
 
 SESSION::SESSION(long long session_id, SOCKET s) : id(session_id), socket(s)
 {
@@ -215,6 +215,21 @@ void SESSION::process_packet(unsigned char* p)
 		case MOVE_DOWN: if (y < (MAP_HEIGHT - 1)) ++y; break;
 		case MOVE_LEFT: if (x > 0) --x; break;
 		case MOVE_RIGHT:if (x < (MAP_WIDTH - 1)) ++x; break;
+		}
+
+		bool blocked = false;
+		for (auto id : sectors[x/SECTOR_SIZE][y/ SECTOR_SIZE]) {
+			if (id >= MAX_USER + NUM_MONSTER) { // Àå¾Ö¹° id
+				if (obstacles.count(id) && obstacles[id]->x == x && obstacles[id]->y == y) {
+					blocked = true;
+					break;
+				}
+			}
+		}
+		if (blocked) {
+			x = old_x;
+			y = old_y;
+			break; 
 		}
 
 		std::set<long long> candidate_ids;
