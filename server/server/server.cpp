@@ -5,7 +5,6 @@ using namespace std;
 
 unordered_map<long long, shared_ptr<SESSION>> Characters;
 unordered_map<long long, shared_ptr<NPC_SESSION>> npcs;
-tile_info tile_map[MAP_WIDTH][MAP_HEIGHT];
 
 atomic<long long> global_new_id = 0;
 atomic<bool> npc_running = true;
@@ -13,14 +12,19 @@ atomic<bool> npc_running = true;
 SOCKET s_socket;
 mutex m_characters;
 
-void InitializeMap() {
-	for (int i = 0; i < MAP_WIDTH; ++i) {
-		for (int j = 0; j < MAP_HEIGHT; ++j) {
-			tile_map[i][j].tile = (rand() % 4 == 3) ? 1 : 0; // 3:1로 장애물(1), 땅(0)
-			tile_map[i][j].rock_num = rand() % 3;
-		}
+std::unordered_map<long long, std::shared_ptr<Obstacle>> obstacles;
+
+void InitializeObstacles() {
+	long long next_obs_id = MAX_USER + NUM_MONSTER;
+	for (int i = 0; i < NUM_OBSTACLE; ++i) {
+		int x = rand() % MAP_WIDTH;
+		int y = rand() % MAP_HEIGHT;
+		auto obs = std::make_shared<Obstacle>(next_obs_id++, x, y);
+		obstacles[obs->id] = obs; // 반드시 map에 등록
+		add_object(obs->id, x, y); // 섹터 등록
 	}
 }
+
 
 void InitializeNPC()
 {
@@ -171,7 +175,7 @@ int main()
 	HANDLE hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(s_socket), hIOCP, -1, 0);
 
-	InitializeMap();
+	InitializeObstacles();
 	InitializeNPC();
 	thread npc_thread(npc_thread_func);
 	do_accept();

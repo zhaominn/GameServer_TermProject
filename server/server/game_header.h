@@ -6,6 +6,7 @@ constexpr short MAX_CHAT_LENGTH = 255;
 
 constexpr int  MAX_USER = 20000;
 constexpr int  NUM_MONSTER = 200000;
+constexpr int  NUM_OBSTACLE = 100000;
 
 constexpr char S2C_P_AVATAR_INFO = 1;
 constexpr char S2C_P_MOVE = 2;
@@ -21,7 +22,7 @@ constexpr char C2S_P_CHAT = 11;
 constexpr char C2S_P_TELEPORT = 12;		// 동접 테스트 할 때
 // 시작마을의 HOTSPOT을 방지하기 위해 
 // RANDOM TELEPORT할 때 사용
-constexpr char S2C_P_TILEMAP = 13;
+constexpr char S2C_P_TILEMAP_CHUNK = 13;
 
 constexpr char MAX_ID_LENGTH = 20;
 
@@ -69,9 +70,11 @@ struct sc_packet_enter {
 	char type;
 	long long  id;
 	char name[MAX_ID_LENGTH];
-	char o_type;						// 0 : PLAYER
-	// 1...  : NPC들  
+	char o_type;			// 0 : PLAYER
+							// 1...  : NPC들 
+							// 2 : Obstacle
 	short x, y;
+	char rock_num;          // 장애물 종류
 };
 
 struct sc_packet_leave {
@@ -136,15 +139,4 @@ struct cs_packet_teleport {
 	char  type;
 };
 
-struct tile_info {
-	unsigned char tile;     // 0: 땅, 1: 장애물 등
-	unsigned char rock_num; // 0~2
-};
-
-struct sc_packet_tilemap {
-	unsigned char size;
-	char type;
-	// 실제 플레이어 패킷 규약에는 더 다양한 필드 가능
-	tile_info tile_map[MAP_WIDTH][MAP_HEIGHT];
-};
 #pragma pack (pop)

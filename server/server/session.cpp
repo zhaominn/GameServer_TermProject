@@ -4,7 +4,8 @@
 
 extern std::unordered_map<long long, std::shared_ptr<SESSION>> Characters;
 extern std::unordered_map<long long, std::shared_ptr<NPC_SESSION>> npcs;
-extern tile_info tile_map[MAP_WIDTH][MAP_HEIGHT];
+
+extern std::unordered_map<long long, std::shared_ptr<Obstacle>> obstacles;
 
 SESSION::SESSION(long long session_id, SOCKET s) : id(session_id), socket(s)
 {
@@ -112,18 +113,29 @@ void SESSION::send_add_player_packet(int target_id) {
 	packet.id = target_id;
 
 	if (target_id < MAX_USER) {
+		if (!Characters.count(target_id)) return;
 		auto& t = Characters[target_id];
 		strncpy_s(packet.name, t->name.c_str(), MAX_ID_LENGTH);
 		packet.o_type = 0; // 플레이어
 		packet.x = t->x;
 		packet.y = t->y;
 	}
-	else {
+	else if(target_id<MAX_USER+NUM_MONSTER){
+		if (!npcs.count(target_id)) return;
 		auto& n = npcs[target_id];
 		strncpy_s(packet.name, n->name.c_str(), MAX_ID_LENGTH);
 		packet.o_type = 1; // NPC
 		packet.x = n->x;
 		packet.y = n->y;
+	}
+	else {
+		if (!obstacles.count(target_id)) return;
+		auto& n = obstacles[target_id];
+		strncpy_s(packet.name, "Rock", MAX_ID_LENGTH);
+		packet.o_type = 2; // Obstacle
+		packet.x = n->x;
+		packet.y = n->y;
+		packet.rock_num = n->rock_num;
 	}
 
 	send_packet(&packet);
@@ -175,6 +187,13 @@ void SESSION::process_packet(unsigned char* p)
 			}
 		}
 
+		for (auto& p : obstacles) {
+			if (can_see_obstacle(p.second->x,p.second->y)) { // (can_see 로직에 장애물 조건 포함)
+				view_list.insert(p.second->id);
+				send_add_player_packet(p.second->id);
+			}
+		}
+
 		for (long long vid : view_list) {
 			if (vid >= MAX_USER) {
 				auto it = npcs.find(vid);
@@ -183,13 +202,7 @@ void SESSION::process_packet(unsigned char* p)
 			}
 			send_add_player_packet(vid);
 		}
-		/*
-		sc_packet_tilemap tile_packet;
-		tile_packet.size = sizeof(tile_packet);
-		tile_packet.type = S2C_P_TILEMAP;
-		memcpy(tile_packet.tile_map, tile_map, sizeof(tile_map));
 
-		send_packet(&tile_packet);*/
 		break;
 	}
 	case C2S_P_MOVE:
@@ -217,6 +230,9 @@ void SESSION::process_packet(unsigned char* p)
 			else if (npcs.count(id) && can_see(*npcs[id])) {
 				near_list.insert(id);
 			}
+			else if (obstacles.count(id) && can_see_obstacle(obstacles[id]->x,obstacles[id]->y)) {
+				near_list.insert(id);
+			}
 		}
 
 		move_object(id, old_x, old_y, x, y);
@@ -231,7 +247,7 @@ void SESSION::process_packet(unsigned char* p)
 					Characters[nl]->send_move_player_packet(id); // 그쪽에서 나의 움직임도 알림
 				}
 			}
-			else {
+			else if(nl < MAX_USER+ NUM_MONSTER){
 				// NPC: 처음 내 시야에 들어왔다면 active 켜주기
 				if (is_new && npcs.count(nl))
 					npcs[nl]->active = true;
@@ -262,4 +278,9 @@ void SESSION::process_packet(unsigned char* p)
 bool SESSION::can_see(const SESSION& other) const {
 	return abs(this->x - other.x) <= VIEW_RANGE
 		&& abs(this->y - other.y) <= VIEW_RANGE;
+}
+
+bool SESSION::can_see_obstacle(const int x, const int y) const {
+	return abs(this->x - x) <= VIEW_RANGE
+		&& abs(this->y - y) <= VIEW_RANGE;
 }

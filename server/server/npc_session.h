@@ -1,5 +1,5 @@
 #pragma once
-#include "session.h"
+#include "obstacle.h"
 
 
 class NPC_SESSION : public SESSION {

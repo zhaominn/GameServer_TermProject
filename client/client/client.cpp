@@ -47,13 +47,17 @@ unordered_map<INT, Character> npcs;
 atomic<bool> network_running{ true };
 thread network_thread;
 
-class Map {
+class Obstacle {
 public:
-	int tile;		// 0 땅, 1 장애물 
-	int rock_num;	// 0, 1, 2 중에 하나
+	int id;
+	int x, y;
+	int rock_num;
+	bool can_see;
+
+	Obstacle() {};
 };
 
-Map tile_map[MAP_WIDTH][MAP_HEIGHT];
+unordered_map<INT, Obstacle> obstacles;
 
 void send_packet(void* packet)
 {
@@ -111,7 +115,14 @@ void process_packet(char* ptr)
 			player.name[MAX_ID_LENGTH - 1] = '\0';
 			player.can_see = true;
 		}
-		else if (packet->o_type == 1) { // ★★★ NPC 구분
+		else if (packet->o_type == 2) { // 장애물!
+			obstacles[id].id = id;
+			obstacles[id].x = packet->x;
+			obstacles[id].y = packet->y;
+			obstacles[id].rock_num = packet->rock_num;
+			obstacles[id].can_see = true;
+		}
+		else if (packet->o_type == 1) {
 			npcs[id].x = packet->x;
 			npcs[id].y = packet->y;
 			npcs[id].id = id;
@@ -138,6 +149,10 @@ void process_packet(char* ptr)
 			player.x = packet->x;
 			player.y = packet->y;
 		}
+		else if (obstacles.count(other_id)) {  // 장애물 이동 (움직이는 경우?)
+			obstacles[other_id].x = packet->x;
+			obstacles[other_id].y = packet->y;
+		}
 		else if (npcs.count(other_id)) {  // NPC 이동
 			npcs[other_id].x = packet->x;
 			npcs[other_id].y = packet->y;
@@ -155,18 +170,15 @@ void process_packet(char* ptr)
 		if (other_id == player.id) {
 			player.can_see = false;
 		}
+		else if (obstacles.count(other_id)) { // 장애물 사라짐
+			obstacles[other_id].can_see = false;
+		}
 		else if (npcs.count(other_id)) { // NPC 나감
 			npcs[other_id].can_see = false;
 		}
 		else if (Characters.count(other_id)) { // 플레이어 나감
 			Characters[other_id].can_see = false;
 		}
-		break;
-	}
-	case S2C_P_TILEMAP: {
-		sc_packet_tilemap* p = reinterpret_cast<sc_packet_tilemap*>(ptr);
-		memcpy(tile_map, p->tile_map, sizeof(tile_map));
-
 		break;
 	}
 	default:
@@ -237,25 +249,6 @@ void drawBackground(CImage& img, HDC hdc) {
 	}
 }
 
-void drawRock(CImage& img, HDC hdc) {
-	// (drawBackground 호출 바로 아래)
-	for (int dy = -WINDOW_CENTER; dy <= WINDOW_CENTER; ++dy) {
-		for (int dx = -WINDOW_CENTER; dx <= WINDOW_CENTER; ++dx) {
-			int world_x = player.x + dx;
-			int world_y = player.y + dy;
-			if (world_x < 0 || world_x >= MAP_WIDTH || world_y < 0 || world_y >= MAP_HEIGHT) continue;
-
-			int draw_x = TILE_SIZE * (WINDOW_CENTER + dx);
-			int draw_y = TILE_SIZE * (WINDOW_CENTER + dy);
-
-			if (tile_map[world_x][world_y].tile == 1)
-				img.Draw(hdc, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
-					0, tile_map[world_x][world_y].rock_num * 100, 100, 100);
-		}
-	}
-
-}
-
 HWND hWnd;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -323,7 +316,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 		if (make_id) {
 			drawBackground(Background, memDC);
-			drawRock(Rock, memDC);
 
 			Ninja.Draw(memDC, TILE_SIZE * WINDOW_CENTER, TILE_SIZE * WINDOW_CENTER,
 				TILE_SIZE, TILE_SIZE, (player.dir - 1) * TILE_SIZE, player.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
@@ -362,6 +354,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 				MultiByteToWideChar(CP_ACP, 0, ch.name, -1, szName, 32);
 				TextOut(memDC, draw_x, draw_y - 20, szName, wcslen(szName));
+			}
+
+			for (auto& obs : obstacles) {
+				if (!obs.second.can_see) continue;
+				int offset_x = obs.second.x - player.x;
+				int offset_y = obs.second.y - player.y;
+				int draw_x = TILE_SIZE * (WINDOW_CENTER + offset_x);
+				int draw_y = TILE_SIZE * (WINDOW_CENTER + offset_y);
+
+				Rock.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE, 
+					0, 0 * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+
 			}
 		}
 		else {

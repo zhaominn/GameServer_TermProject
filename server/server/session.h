@@ -45,4 +45,6 @@ public:
 	void process_packet(unsigned char* p);
 
 	bool can_see(const SESSION& other) const;
+
+	bool can_see_obstacle(const int x, const int y) const;
 };
