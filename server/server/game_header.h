@@ -23,6 +23,7 @@ constexpr char C2S_P_TELEPORT = 12;		// 동접 테스트 할 때
 // 시작마을의 HOTSPOT을 방지하기 위해 
 // RANDOM TELEPORT할 때 사용
 constexpr char S2C_P_TILEMAP_CHUNK = 13;
+constexpr char C2S_P_REVIVE = 14;
 
 constexpr char MAX_ID_LENGTH = 20;
 
@@ -150,5 +151,12 @@ struct cs_packet_teleport {
 	unsigned char  size;
 	char  type;
 };
+
+struct cs_packet_reborn {
+	unsigned char size;
+	unsigned char type; // C2S_P_REVIVE
+	int x, y;           // 새 좌표(서버가 지정해줘도 되고, 클라에서 랜덤챡 출력 후 보내도)
+};
+
 
 #pragma pack (pop)

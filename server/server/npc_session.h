@@ -8,6 +8,8 @@ public:
 	long long	chase_target_id = -1;
 	char		npc_type;
 	std::chrono::steady_clock::time_point next_move;
+	bool dead = false;
+	std::chrono::steady_clock::time_point respawn_time;
 
 	NPC_SESSION() = default;
 
@@ -23,5 +25,5 @@ public:
 
 	void give_damage(SESSION* target,int damage) override;
 
-	void remove_npc();
+	void npc_die();
 };

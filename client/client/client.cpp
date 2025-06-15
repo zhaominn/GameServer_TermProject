@@ -28,7 +28,6 @@ public:
 	short hp;
 	short level;
 	int   exp;
-	bool die;
 	int death_draw_tick;
 	char npc_type;
 
@@ -41,7 +40,6 @@ public:
 		dir = MOVE_DOWN;
 		frame = 0;
 		can_see = false;
-		die = false;
 		death_draw_tick = 0;
 	}
 
@@ -54,8 +52,6 @@ Character player;
 
 unordered_map<INT, Character> Characters;
 unordered_map<INT, Character> npcs;
-vector<int> dead_npc_ids;
-vector<int> dead_char_ids;
 
 atomic<bool> network_running{ true };
 thread network_thread;
@@ -99,6 +95,25 @@ void logIn() {
 	packet.type = C2S_P_LOGIN;
 	strncpy_s(packet.name, sizeof(packet.name), player.name, _TRUNCATE);
 	send_packet(&packet);
+}
+
+void reborn() {
+	player.x = rand() % MAP_WIDTH;
+	player.y = rand() % MAP_HEIGHT;
+
+	// 2. HP 회복 (최대 체력으로)
+	player.hp = PLAYER_MAX_HP;
+
+	// 3. 경험치 반감
+	player.exp /= 2;
+
+	cs_packet_reborn packet;
+	packet.size = sizeof(packet);
+	packet.type = C2S_P_REVIVE;
+	packet.x = player.x;
+	packet.y = player.y;
+	send_packet(&packet);
+
 }
 
 void process_packet(char* ptr)
@@ -203,7 +218,7 @@ void process_packet(char* ptr)
 			player.exp = exp;
 
 			if (player.hp <= 0) {
-				player.die = true;
+				reborn();
 			}
 		}
 		else if (npcs.count(id)) {
@@ -211,10 +226,8 @@ void process_packet(char* ptr)
 			npcs[id].level = level;
 			npcs[id].exp = exp;
 			if (npcs[id].hp <= 0) {
-				npcs[id].die = true;
 				npcs[id].frame = 6;
 				npcs[id].dir = 2;
-				dead_npc_ids.push_back(id);
 			}
 		}
 		else if (Characters.count(id)) {
@@ -222,10 +235,8 @@ void process_packet(char* ptr)
 			Characters[id].level = level;
 			Characters[id].exp = exp;
 			if (Characters[id].hp <= 0) {
-				Characters[id].die = true;
 				Characters[id].frame = 6;
 				Characters[id].dir = 2;
-				dead_char_ids.push_back(id);
 			}
 		}
 		break;
@@ -329,7 +340,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	(HBRUSH)(COLOR_WINDOW + 1), 0, L"MMORPG" };
 	RegisterClass(&wc);
 
-	hWnd = CreateWindow(L"MMORPG", L"MMORPG", WS_OVERLAPPEDWINDOW, 0, 0, 
+	hWnd = CreateWindow(L"MMORPG", L"MMORPG", WS_OVERLAPPEDWINDOW, 0, 0,
 		TOTAL_WIN_W, WINDOW_SIZE, NULL, (HMENU)NULL, hInstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 
@@ -568,57 +579,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			static auto last_move_time = chrono::steady_clock::now();
 			static auto last_attack_time = chrono::steady_clock::now();
 
-			if (player.die) {
-				if (player.death_draw_tick++ > 10)
-					closesocket(my_socket);
+
+			if ((key[0] || key[1] || key[2] || key[3])
+				&& (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - last_move_time).count() >= MOVE_DELAY_MS)) {
+				player.frame = (player.frame + 1) % 4;
+				cs_packet_move p;
+				p.size = sizeof(p);
+				p.type = C2S_P_MOVE;
+				p.direction = player.dir;
+				send_packet(&p);
+
+				last_move_time = chrono::steady_clock::now();
 			}
-			else {
-				if ((key[0] || key[1] || key[2] || key[3])
-					&& (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - last_move_time).count() >= MOVE_DELAY_MS)) {
-					player.frame = (player.frame + 1) % 4;
-					cs_packet_move p;
-					p.size = sizeof(p);
-					p.type = C2S_P_MOVE;
-					p.direction = player.dir;
-					send_packet(&p);
+			if (attack
+				&& (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - last_attack_time).count() >= ATTACK_DELAY_MS)) {
+				player.frame = (player.frame + 1) % 2 + 4;
+				cs_packet_attack p;
+				p.size = sizeof(p);
+				p.type = C2S_P_ATTACK;
+				send_packet(&p);
 
-					last_move_time = chrono::steady_clock::now();
-				}
-				if (attack
-					&& (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - last_attack_time).count() >= ATTACK_DELAY_MS)) {
-					player.frame = (player.frame + 1) % 2 + 4;
-					cs_packet_attack p;
-					p.size = sizeof(p);
-					p.type = C2S_P_ATTACK;
-					send_packet(&p);
-
-					last_attack_time = chrono::steady_clock::now();
-				}
+				last_attack_time = chrono::steady_clock::now();
 			}
-
-			for (auto it = dead_npc_ids.begin(); it != dead_npc_ids.end(); ) {
-				int id = *it;
-				if (++npcs[id].death_draw_tick > 5) {
-					npcs.erase(id);
-					it = dead_npc_ids.erase(it);
-				}
-				else {
-					++it;
-				}
-			}
-
-			for (auto it = dead_char_ids.begin(); it != dead_char_ids.end(); ) {
-				int id = *it;
-				if (++Characters[id].death_draw_tick > 5) {
-					Characters.erase(id);
-					it = dead_char_ids.erase(it);
-				}
-				else {
-					++it;
-				}
-			}
-
-
 		}
 		InvalidateRect(hWnd, NULL, FALSE);
 		break;

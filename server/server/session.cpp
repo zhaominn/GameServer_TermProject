@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "npc_session.h"
 
-
 extern std::unordered_map<long long, std::shared_ptr<SESSION>> Characters;
 extern std::unordered_map<long long, std::shared_ptr<NPC_SESSION>> npcs;
 extern std::unordered_map<long long, std::shared_ptr<Obstacle>> obstacles;
@@ -206,7 +205,7 @@ void SESSION::process_packet(unsigned char* p)
 		y = rand() % MAP_HEIGHT;;
 		level = 1;
 		hp = PLAYER_MAX_HP;
-		exp = 0;
+		exp = 99;
 		printf("client[%lld] %s login\n", id, name.c_str());
 		send_player_info();
 
@@ -366,6 +365,17 @@ void SESSION::process_packet(unsigned char* p)
 		}
 		break;
 	}
+	case C2S_P_REVIVE: {
+		cs_packet_reborn* packet = reinterpret_cast<cs_packet_reborn*>(p);
+		x = packet->x;
+		y = packet->y;
+		hp = PLAYER_MAX_HP;
+		exp /= 2;
+		// 추가적으로 플레이어 상태 재초기화, sector 등록 등 처리
+		send_state_change_packet(); // ← 클라/주변에 HP/EXP 갱신
+		break;
+	}
+
 	default:
 		std::cout << "Error Invalid Packet Type\n";
 		exit(-1);

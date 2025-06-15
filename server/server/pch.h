@@ -3,12 +3,14 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <queue>
 #include <map>
 #include <string>
 #include <thread>
 #include <mutex>
 #include <set>
 #include <chrono>
+#include <tuple>
 
 #include <WS2tcpip.h>
 #include <MSWSock.h>

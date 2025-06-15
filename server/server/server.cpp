@@ -66,6 +66,24 @@ void npc_thread_func() {
 		std::lock_guard<std::mutex> lock(m_characters);
 		for (auto& it : npcs) {
 			auto& npc = it.second;
+
+			if (npc->dead && npc->respawn_time <= chrono::steady_clock::now()) {
+				// 부활로직
+				npc->hp = NPC_MAX_HP;
+				npc->active = true;
+				npc->dead = false;
+				// 원하는 곳(스폰좌표)로 이동, 혹은 랜덤 x/y
+				npc->x = rand() % MAP_WIDTH;
+				npc->y = rand() % MAP_HEIGHT;
+				add_object(npc->id, npc->x, npc->y);
+				printf("[%s] (id:%lld) 부활! x=%d y=%d\n", npc->name.c_str(), npc->id, npc->x, npc->y);
+
+				// 서버 AOI 동기화 - 근방 플레이어에 ENTER 패킷! (view_list, can_see 처리)
+				for (auto& c : Characters)
+					if (c.second->can_see(*npc))
+						c.second->send_add_player_packet(npc->id);
+			}
+
 			npc->npc_move();
 		}
 	}
