@@ -188,7 +188,7 @@ void SESSION::process_packet(unsigned char* p)
 		name = packet->name;
 		x = rand() % MAP_WIDTH;
 		y = rand() % MAP_HEIGHT;;
-		level = 0;
+		level = 1;
 		hp = PLAYER_MAX_HP;
 		exp = 0;
 		printf("client[%lld] %s login\n", id, name.c_str());

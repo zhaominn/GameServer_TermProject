@@ -317,7 +317,6 @@ void drawBackground(CImage& img, HDC hdc) {
 }
 
 HWND hWnd;
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 HINSTANCE g_hInst;
@@ -330,7 +329,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	(HBRUSH)(COLOR_WINDOW + 1), 0, L"MMORPG" };
 	RegisterClass(&wc);
 
-	hWnd = CreateWindow(L"MMORPG", L"MMORPG", WS_OVERLAPPEDWINDOW, 0, 0, WINDOW_SIZE + 15, WINDOW_SIZE, NULL, (HMENU)NULL, hInstance, NULL);
+	hWnd = CreateWindow(L"MMORPG", L"MMORPG", WS_OVERLAPPEDWINDOW, 0, 0, 
+		TOTAL_WIN_W, WINDOW_SIZE, NULL, (HMENU)NULL, hInstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 
 	MSG msg;
@@ -345,11 +345,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 CImage Ninja, NinjaDark, NinjaRed, Background, Rock;
 CImage backBuffer;
 HFONT hFont;
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	HDC hDC, memDC;
 	PAINTSTRUCT ps;
-	RECT rc = { 0, 0, WINDOW_SIZE, WINDOW_SIZE };
+	RECT rc = { 0, 0, TOTAL_WIN_W, WINDOW_SIZE };
 	HBRUSH hBrush;
 
 	switch (uMsg) {
@@ -360,7 +359,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		Background.Load(L"img/Grass2.png");
 		Rock.Load(L"img/Rock.png");
 
-		backBuffer.Create(WINDOW_SIZE, WINDOW_SIZE, 32);
+		backBuffer.Create(TOTAL_WIN_W, WINDOW_SIZE, 32);
 
 		hFont = CreateFont(
 			20, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
@@ -378,7 +377,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		SetTextColor(memDC, RGB(0, 0, 0));
 		SetBkMode(memDC, TRANSPARENT);
 
-		hBrush = CreateSolidBrush(RGB(0, 0, 0));
+		hBrush = CreateSolidBrush(RGB(255, 255, 255));
 		FillRect(memDC, &rc, hBrush);
 		DeleteObject(hBrush);
 
@@ -437,20 +436,73 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 				Rock.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
 					0, 0 * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-
 			}
+
+			//---------- Draw UI ----------
+
+			SetTextColor(memDC, RGB(0, 0, 0));
+
+			WCHAR buf[128];
+			swprintf(buf, 128, L"ID    : %d", player.id);
+			TextOut(memDC, UI_LEFT, UI_TOP + UI_LINE * 0, buf, wcslen(buf));
+			swprintf(buf, 128, L"X     : %d", player.x);
+			TextOut(memDC, UI_LEFT, UI_TOP + UI_LINE * 1, buf, wcslen(buf));
+			swprintf(buf, 128, L"Y     : %d", player.y);
+			TextOut(memDC, UI_LEFT, UI_TOP + UI_LINE * 2, buf, wcslen(buf));
+			swprintf(buf, 128, L"LEVEL : %d", player.level);
+			TextOut(memDC, UI_LEFT, UI_TOP + UI_LINE * 3, buf, wcslen(buf));
+			swprintf(buf, 128, L"EXP   : %d", player.exp);
+			TextOut(memDC, UI_LEFT, UI_TOP + UI_LINE * 4, buf, wcslen(buf));
+
+			// EXP 바(Rectangle/FillRect)
+			int bar_left = UI_LEFT;
+			int bar_top = UI_TOP + UI_LINE * 5;
+			int bar_width = 120;
+			int max_exp = player.level * 100;
+			int exp_w = (player.exp * bar_width) / max_exp;
+
+
+			// 배경(빈 칸)
+			HBRUSH bg = CreateSolidBrush(RGB(200, 200, 200));
+			Rectangle(memDC, bar_left - 2, bar_top - 1, bar_left + bar_width + 2, bar_top + 13);
+			DeleteObject(bg);
+
+			// EXP 차오른 부분
+			HBRUSH exp_brush = CreateSolidBrush(RGB(255, 100, 0));
+			RECT r_exp = { bar_left, bar_top, bar_left + exp_w, bar_top + 11 };
+			FillRect(memDC, &r_exp, exp_brush);
+			DeleteObject(exp_brush);
+
+			swprintf(buf, 128, L"HP   : %d", player.hp);
+			TextOut(memDC, UI_LEFT, UI_TOP + UI_LINE * 6, buf, wcslen(buf));
+
+			// HP 바(Rectangle/FillRect)
+			bar_top = UI_TOP + UI_LINE * 7;
+			int hp_w = (player.hp > PLAYER_MAX_HP) ? bar_width : player.hp * bar_width / PLAYER_MAX_HP;
+
+			// 배경(빈 칸)
+			Rectangle(memDC, bar_left - 2, bar_top - 1, bar_left + bar_width + 2, bar_top + 13);
+			DeleteObject(bg);
+
+			// HP 차오른 부분
+			HBRUSH hp_brush = CreateSolidBrush(RGB(255, 0, 0));
+			RECT r_hp = { bar_left, bar_top, bar_left + hp_w, bar_top + 11 };
+			FillRect(memDC, &r_hp, hp_brush);
+			DeleteObject(hp_brush);
+
+
 		}
 		else {
 			RECT r = { 50, 220, 400, 260 };
 			SetBkMode(memDC, TRANSPARENT);
-			SetTextColor(memDC, RGB(255, 255, 0));
+			SetTextColor(memDC, RGB(255, 0, 0));
 			DrawTextA(memDC, "아이디를 입력하세요:", -1, &r, DT_LEFT | DT_SINGLELINE);
 
 			RECT r2 = { 50, 250, 400, 280 };
 			DrawTextA(memDC, id_buffer, -1, &r2, DT_LEFT | DT_SINGLELINE);
 		}
 
-		BitBlt(hDC, 0, 0, WINDOW_SIZE, WINDOW_SIZE, memDC, 0, 0, SRCCOPY);
+		BitBlt(hDC, 0, 0, TOTAL_WIN_W, WINDOW_SIZE, memDC, 0, 0, SRCCOPY);
 		backBuffer.ReleaseDC();
 
 		EndPaint(hWnd, &ps);
