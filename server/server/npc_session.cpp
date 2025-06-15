@@ -232,9 +232,13 @@ void NPC_SESSION::npc_move() {
 
 void NPC_SESSION::take_damage(int damage, long long attacker_id) {
 	hp -= damage;
-	if (hp < 0) hp = 0;
+	if (hp < 0) {
+		hp = 0;
+		int exp_size = Characters[attacker_id]->level * Characters[attacker_id]->level * 2* npc_type;
+		Characters[attacker_id]->plus_exp(exp_size);
+	}
 
-if (npc_type == 1 && !chasing && Characters.count(attacker_id)) {
+	if (npc_type == 1 && !chasing && Characters.count(attacker_id)) {
 		chasing = true;
 		chase_target_id = attacker_id;
 	}
@@ -243,9 +247,9 @@ if (npc_type == 1 && !chasing && Characters.count(attacker_id)) {
 
 void NPC_SESSION::give_damage(SESSION* target, int damage) {
 	printf("[%s]  -> [%s] (id:%lld) : %d 데미지를 주었습니다.\n",
-		name.c_str(),  target->name.c_str(), target->id, damage);
+		name.c_str(), target->name.c_str(), target->id, damage);
 
-	target->take_damage(damage,id);
+	target->take_damage(damage, id);
 	send_state_change_packet();
 }
 

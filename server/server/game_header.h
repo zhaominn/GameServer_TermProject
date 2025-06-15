@@ -39,9 +39,9 @@ constexpr unsigned short TILE_SIZE = 40;
 constexpr unsigned int WINDOW_SIZE = 840;
 constexpr int WINDOW_CENTER = 10;
 
-constexpr unsigned short PLAYER_MAX_HP = 200;
-constexpr unsigned short NPC_MAX_HP = 100;
-constexpr unsigned short ATTACK_POWER = 24;
+constexpr unsigned short PLAYER_MAX_HP = 100;
+constexpr unsigned short NPC_MAX_HP = 50;
+constexpr unsigned short ATTACK_POWER = 4;
 
 constexpr unsigned int UI_WIDTH = 150;
 constexpr unsigned int TOTAL_WIN_W = WINDOW_SIZE + UI_WIDTH + 15;

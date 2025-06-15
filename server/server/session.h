@@ -49,6 +49,8 @@ public:
 
 	virtual void give_damage(SESSION* target, int damage);
 
+	void plus_exp(int size);
+
 	void process_packet(unsigned char* p);
 
 	bool can_see(const SESSION& other) const;

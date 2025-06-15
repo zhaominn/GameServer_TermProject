@@ -177,14 +177,18 @@ void SESSION::take_damage(int damage, long long attacker_id = 0) {
 }
 
 void SESSION::give_damage(SESSION* target, int damage) {
-	printf("[%s] -> [%s] (id:%lld) : %d 데미지를 주고 10의 경험치를 얻었습니다.\n",
+	printf("[%s] -> [%s] (id:%lld) : %d 데미지를 주었습니다.\n",
 		name.c_str(), target->name.c_str(), target->id, damage);
 
 	target->take_damage(damage);
-	exp += 10;
+	send_state_change_packet();
+}
+
+void SESSION::plus_exp(int size) {
+	exp += size;
 	if (exp >= level * 100) {
 		++level;
-		printf("[%s] %d레벨로 레벨업하고 %d의 hp를 얻었습니다.\n", name.c_str(), level,level*10);
+		printf("[%s] %d레벨로 레벨업하고 %d의 hp를 얻었습니다.\n", name.c_str(), level, level * 10);
 		hp += level * 10;
 	}
 	send_state_change_packet();
