@@ -10,14 +10,13 @@
 
 #include <WS2tcpip.h>
 
-#include <process.h> // 랜덤 이름
 #pragma comment (lib, "WS2_32.LIB")
 
 #include "..\..\server\server\game_header.h"
 using namespace std;
 
-bool make_id = false;
-char id_buffer[MAX_ID_LENGTH] = "";
+bool make_id = false; 
+char id_buffer[MAX_ID_LENGTH] = "";      // 유저 ID 입력용
 int id_len = 0;
 
 class Character {
@@ -93,7 +92,7 @@ void logIn() {
 	cs_packet_login packet;
 	packet.size = sizeof(packet);
 	packet.type = C2S_P_LOGIN;
-	strncpy_s(packet.name, sizeof(packet.name), player.name, _TRUNCATE);
+	packet.id = player.id;
 	send_packet(&packet);
 }
 
@@ -130,6 +129,7 @@ void process_packet(char* ptr)
 		player.level = packet->level;
 		player.exp = packet->exp;
 		player.can_see = true;
+
 		make_id = true;
 		break;
 	}
@@ -508,7 +508,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			RECT r = { 50, 220, 400, 260 };
 			SetBkMode(memDC, TRANSPARENT);
 			SetTextColor(memDC, RGB(255, 0, 0));
-			DrawTextA(memDC, "아이디를 입력하세요:", -1, &r, DT_LEFT | DT_SINGLELINE);
+			DrawTextA(memDC, "아이디를 입력하세요(숫자만 입력하세요.) : ", -1, &r, DT_LEFT | DT_SINGLELINE);
 
 			RECT r2 = { 50, 250, 400, 280 };
 			DrawTextA(memDC, id_buffer, -1, &r2, DT_LEFT | DT_SINGLELINE);
@@ -526,14 +526,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				id_buffer[--id_len] = '\0';
 			}
 			else if (wParam == VK_RETURN) {
-				if (id_len == 0)
-					sprintf_s(player.name, "player_%d", _getpid());
-				else {
-					strncpy_s(player.name, sizeof(player.name), id_buffer, _TRUNCATE);
-					player.name[sizeof(player.name) - 1] = '\0';
-				}
-				logIn();
+				if (id_len > 0) {
+					id_buffer[id_len] = '\0';
+					player.id = _atoi64(id_buffer);
+					logIn();
 				id_len = 0; id_buffer[0] = '\0';
+				}
 			}
 			else if (id_len < MAX_ID_LENGTH - 1 && isprint((char)wParam)) {
 				id_buffer[id_len++] = (char)wParam;

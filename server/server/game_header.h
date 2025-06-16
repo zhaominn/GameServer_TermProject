@@ -127,7 +127,7 @@ struct sc_packet_login_fail {
 struct cs_packet_login {
 	unsigned char  size;
 	char  type;
-	char  name[MAX_ID_LENGTH];
+	long long  id;
 };
 
 struct cs_packet_move {

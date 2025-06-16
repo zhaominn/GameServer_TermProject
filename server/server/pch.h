@@ -11,7 +11,8 @@
 #pragma comment (lib, "odbc32.LIB")
 
 #include <iostream>
-#include <cstdio>
+#include <stdio.h>
+#include <process.h>
 
 #include <unordered_map>
 #include <unordered_set>

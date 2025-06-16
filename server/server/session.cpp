@@ -206,6 +206,7 @@ void SESSION::process_packet(unsigned char* p)
 	case C2S_P_LOGIN:
 	{
 		cs_packet_login* packet = reinterpret_cast<cs_packet_login*>(p);
+		id = packet->id;
 
 		std::string db_name;
 		short db_x, db_y, db_maxhp, db_hp, db_level;
@@ -227,7 +228,10 @@ void SESSION::process_packet(unsigned char* p)
 			exp = db_exp;
 		}
 		else {
-			name = packet->name; // 클라에서 받은 name
+			char name_buffer[32];
+			sprintf_s(name_buffer, sizeof(name_buffer), "player_%d", _getpid());
+			name = name_buffer;
+
 			x = rand() % MAP_WIDTH;
 			y = rand() % MAP_HEIGHT;
 			dir = 1;
