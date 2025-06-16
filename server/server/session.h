@@ -5,7 +5,7 @@ enum STATE { EMPTY, CONNECTED, INGAME };
 
 class SESSION {
 public:
-	long long id;
+	int id;
 	std::string name;
 	short x, y;
 	char dir;
@@ -19,7 +19,7 @@ public:
 	unsigned char remained;
 	unsigned char recv_buffer[MAX_CHAT_LENGTH];
 
-	std::set<long long> view_list;
+	std::set<int> view_list;
 
 public:
 	SESSION() : id(0), name(), x(0), y(0), max_hp(0), hp(0), level(0), exp(0),
@@ -27,7 +27,7 @@ public:
 		memset(recv_buffer, 0, sizeof(recv_buffer));
 	};
 
-	SESSION(long long session_id, SOCKET s);
+	SESSION(int session_id, SOCKET s);
 
 	~SESSION();
 
@@ -45,7 +45,7 @@ public:
 
 	void send_state_change_packet();
 
-	virtual void take_damage(int damage, long long attacker_id);
+	virtual void take_damage(int damage, int attacker_id);
 
 	virtual void give_damage(SESSION* target, int damage);
 

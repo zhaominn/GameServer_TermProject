@@ -3,8 +3,8 @@
 
 extern std::unordered_map<long long, std::shared_ptr<SESSION>> Characters;
 extern std::unordered_map<long long, std::shared_ptr<NPC_SESSION>> npcs;
-extern std::unordered_map<long long, std::shared_ptr<Obstacle>> obstacles;
-extern std::unordered_set<long long> sectors[SECTOR_W][SECTOR_H];
+extern std::unordered_map<int, std::shared_ptr<Obstacle>> obstacles;
+extern std::unordered_set<int> sectors[SECTOR_W][SECTOR_H];
 
 NPC_SESSION::NPC_SESSION(int id, std::string name, char type) {
 	this->id = id;
@@ -35,7 +35,7 @@ void NPC_SESSION::send_enter_packet(SESSION* session) {
 	session->send_packet(&packet);
 }
 
-void NPC_SESSION::peace_npc_move() 
+void NPC_SESSION::peace_npc_move()
 {
 	auto now = std::chrono::steady_clock::now();
 	if (chasing && Characters.count(chase_target_id)) {
@@ -77,7 +77,7 @@ void NPC_SESSION::peace_npc_move()
 	}
 }
 
-void NPC_SESSION::agro_npc_move() 
+void NPC_SESSION::agro_npc_move()
 {
 	auto now = std::chrono::steady_clock::now();
 	long long target_id = -1;
@@ -145,9 +145,133 @@ void NPC_SESSION::agro_npc_move()
 	}
 }
 
-void NPC_SESSION::roaming_peace_npc_move() {}
+void NPC_SESSION::roaming_peace_npc_move() {
+	if (chasing && Characters.count(chase_target_id)) {
+		auto target = Characters[chase_target_id];
+		auto now = std::chrono::steady_clock::now();
+		int nx = x, ny = y;
+		if (abs(target->x - x) + abs(target->y - y) == 1) {
+			give_damage(target.get(), ATTACK_POWER);
 
-void NPC_SESSION::roaming_agro_npc_move() {}
+			next_move = now + std::chrono::milliseconds(200 + rand() % 500);
+			return;
+		}
+		else {
+			if (target->x > x) { nx++; dir = MOVE_RIGHT; }
+			else if (target->x < x) { nx--; dir = MOVE_LEFT; }
+			else if (target->y > y) { ny++; dir = MOVE_DOWN; }
+			else if (target->y < y) { ny--; dir = MOVE_UP; }
+		}
+
+		bool blocked = false;
+		for (auto oid : sectors[nx / SECTOR_SIZE][ny / SECTOR_SIZE]) {
+			if (oid >= MAX_USER + NUM_MONSTER) {
+				if (obstacles.count(oid) && obstacles[oid]->x == nx && obstacles[oid]->y == ny) {
+					blocked = true; break;
+				}
+			}
+		}
+		if (blocked) {
+			next_move = now + std::chrono::milliseconds(200 + rand() % 500);
+			return;
+		}
+		x = nx; y = ny;
+		for (auto& u : Characters)
+			if (u.second->can_see(*this))
+				u.second->send_move_player_packet(id);
+	}
+	else {
+		int old_x = x;
+		int old_y = y;
+
+		if (roam_dest_x == x && roam_dest_y == y || roam_dest_x == -1) {
+			roam_dest_x = rand() % MAP_WIDTH;
+			roam_dest_y = rand() % MAP_HEIGHT;
+			roam_tick = 0;
+		}
+
+		if (!chasing) {
+			auto [next_x, next_y] = astar_next_move(x, y, roam_dest_x, roam_dest_y);
+
+			if (next_x == x && next_y == y) {
+				roam_dest_x = rand() % MAP_WIDTH;
+				roam_dest_y = rand() % MAP_HEIGHT;
+				return;
+			}
+			x = next_x; y = next_y;
+
+			if (x > old_x) dir = MOVE_RIGHT;
+			else if (x < old_x) dir = MOVE_LEFT;
+			else if (y > old_y) dir = MOVE_DOWN;
+			else if (y < old_y) dir = MOVE_UP;
+
+			for (auto& u : Characters)
+				if (u.second->can_see(*this))
+					u.second->send_move_player_packet(id);
+
+			roam_tick++;
+			if (roam_tick > 100)
+				roam_dest_x = roam_dest_y = -1;
+		}
+	}
+}
+
+void NPC_SESSION::roaming_agro_npc_move() {
+	long long target_id = -1;
+	int min_dist = 99999;
+
+	int old_x = x;
+	int old_y = y;
+
+	for (auto& p : Characters) {
+		int dx = abs(p.second->x - x), dy = abs(p.second->y - y);
+		if (dx <= 5 && dy <= 5) {
+			int d = dx + dy;
+			if (d < min_dist) { min_dist = d; target_id = p.first; }
+		}
+	}
+
+	if (target_id != -1 && Characters.count(target_id)) {
+		auto [next_x, next_y] = astar_next_move(x, y, Characters[target_id]->x, Characters[target_id]->y);
+
+		if (abs(next_x - x) + abs(next_y - y) == 1) {
+			x = next_x; y = next_y;
+			if (x > old_x) dir = MOVE_RIGHT;
+			else if (x < old_x) dir = MOVE_LEFT;
+			else if (y > old_y) dir = MOVE_DOWN;
+			else if (y < old_y) dir = MOVE_UP;
+
+			for (auto& u : Characters)
+				if (u.second->can_see(*this))
+					u.second->send_move_player_packet(id);
+		}
+	}
+	else {
+		if (roam_dest_x == x && roam_dest_y == y || roam_dest_x == -1) {
+			roam_dest_x = rand() % MAP_WIDTH;
+			roam_dest_y = rand() % MAP_HEIGHT;
+			roam_tick = 0;
+		}
+		auto [next_x, next_y] = astar_next_move(x, y, roam_dest_x, roam_dest_y);
+		if (next_x == x && next_y == y) {
+			roam_dest_x = roam_dest_y = -1;
+			return;
+		}
+		x = next_x; y = next_y;
+		if (x > old_x) dir = MOVE_RIGHT;
+		else if (x < old_x) dir = MOVE_LEFT;
+		else if (y > old_y) dir = MOVE_DOWN;
+		else if (y < old_y) dir = MOVE_UP;
+
+		for (auto& u : Characters)
+			if (u.second->can_see(*this))
+				u.second->send_move_player_packet(id);
+
+		roam_tick++;
+		if (roam_tick > 100)
+			roam_dest_x = roam_dest_y = -1;
+	}
+}
 
 void NPC_SESSION::npc_move() {
 	auto now = std::chrono::steady_clock::now();
@@ -163,9 +287,9 @@ void NPC_SESSION::npc_move() {
 	else if (npc_type == AGRO)
 		agro_npc_move();
 	else if (npc_type == ROAMING_PEACE)
-		peace_npc_move(); // temp
+		roaming_peace_npc_move();
 	else if (npc_type == ROAMING_AGRO)
-		agro_npc_move();  // temp
+		roaming_agro_npc_move(); 
 
 	for (auto& u : Characters) {
 		bool now_seen = u.second->can_see(*this);
@@ -186,7 +310,7 @@ void NPC_SESSION::npc_move() {
 	next_move = std::chrono::steady_clock::now() + std::chrono::milliseconds(100 + (rand() % 5000));
 }
 
-void NPC_SESSION::take_damage(int damage, long long attacker_id) {
+void NPC_SESSION::take_damage(int damage, int attacker_id) {
 	if (dead) return;
 
 	hp -= damage;
@@ -199,7 +323,7 @@ void NPC_SESSION::take_damage(int damage, long long attacker_id) {
 			Characters[attacker_id]->name.c_str(), name.c_str(), id, exp_size);
 	}
 
-	if ((npc_type == 1|| npc_type==3) && !chasing && Characters.count(attacker_id)) {
+	if ((npc_type == 1 || npc_type == 3) && !chasing && Characters.count(attacker_id)) {
 		chasing = true;
 		chase_target_id = attacker_id;
 	}

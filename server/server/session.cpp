@@ -3,10 +3,10 @@
 
 extern std::unordered_map<long long, std::shared_ptr<SESSION>> Characters;
 extern std::unordered_map<long long, std::shared_ptr<NPC_SESSION>> npcs;
-extern std::unordered_map<long long, std::shared_ptr<Obstacle>> obstacles;
-extern std::unordered_set<long long> sectors[SECTOR_W][SECTOR_H];
+extern std::unordered_map<int, std::shared_ptr<Obstacle>> obstacles;
+extern std::unordered_set<int> sectors[SECTOR_W][SECTOR_H];
 
-SESSION::SESSION(long long session_id, SOCKET s) : id(session_id), socket(s)
+SESSION::SESSION(int session_id, SOCKET s) : id(session_id), socket(s)
 {
 	state = EMPTY;
 	remained = 0;
@@ -170,7 +170,7 @@ void SESSION::send_state_change_packet() {
 	send_packet(&p);
 }
 
-void SESSION::take_damage(int damage, long long attacker_id = 0) {
+void SESSION::take_damage(int damage, int attacker_id = 0) {
 	hp -= damage;
 	if (hp < 0) hp = 0;
 
@@ -313,10 +313,10 @@ void SESSION::process_packet(unsigned char* p)
 			break;
 		}
 
-		std::set<long long> candidate_ids;
+		std::set<int> candidate_ids;
 		sector_manager.get_aoi_candidates(x, y, candidate_ids);
-		std::set<long long> near_list;
-		std::set<long long> old_vlist = view_list;
+		std::set<int> near_list;
+		std::set<int> old_vlist = view_list;
 
 		for (auto id : candidate_ids) {
 			if (id == this->id) continue; // 자기 자신은 제외

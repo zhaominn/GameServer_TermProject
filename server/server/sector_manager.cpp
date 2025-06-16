@@ -3,17 +3,17 @@
 
 SECTOR_MANAGER sector_manager;
 
-std::unordered_set<long long> sectors[SECTOR_W][SECTOR_H];
+std::unordered_set<int> sectors[SECTOR_W][SECTOR_H];
 inline int get_sector_x(int x) { return x / SECTOR_SIZE; }
 inline int get_sector_y(int y) { return y / SECTOR_SIZE; }
 
-void SECTOR_MANAGER::add_object(long long obj_id, int x, int y) {
+void SECTOR_MANAGER::add_object(int obj_id, int x, int y) {
 	int sx = get_sector_x(x);
 	int sy = get_sector_y(y);
 	sectors[sx][sy].insert(obj_id);
 }
 
-void  SECTOR_MANAGER::move_object(long long obj_id, int old_x, int old_y, int new_x, int new_y) {
+void  SECTOR_MANAGER::move_object(int obj_id, int old_x, int old_y, int new_x, int new_y) {
 	int old_sx = get_sector_x(old_x), old_sy = get_sector_y(old_y);
 	int new_sx = get_sector_x(new_x), new_sy = get_sector_y(new_y);
 
@@ -23,13 +23,13 @@ void  SECTOR_MANAGER::move_object(long long obj_id, int old_x, int old_y, int ne
 	}
 }
 
-void  SECTOR_MANAGER::remove_object(long long obj_id, int x, int y) {
+void  SECTOR_MANAGER::remove_object(int obj_id, int x, int y) {
 	int sx = get_sector_x(x);
 	int sy = get_sector_y(y);
 	sectors[sx][sy].erase(obj_id);
 }
 
-void  SECTOR_MANAGER::get_aoi_candidates(int px, int py, std::set<long long>& out) {
+void  SECTOR_MANAGER::get_aoi_candidates(int px, int py, std::set<int>& out) {
 	int sx = get_sector_x(px), sy = get_sector_y(py);
 
 	// 내 섹터+주변 셀(15x15 시야, SECTOR_SIZE=8이면 대략 2x2 섹터)

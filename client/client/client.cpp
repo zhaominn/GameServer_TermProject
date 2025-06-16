@@ -361,7 +361,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		NinjaRed.Load(L"img/NinjaRed.png");
 		Skeleton.Load(L"img/Skeleton.png");
 		Spirit.Load(L"img/Spirit.png");
-		Background.Load(L"img/Grass2.png");
+		Background.Load(L"img/Grass.png");
 		Rock.Load(L"img/Rock.png");
 
 		backBuffer.Create(TOTAL_WIN_W, WINDOW_SIZE, 32);

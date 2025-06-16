@@ -12,7 +12,12 @@ class NPC_SESSION : public SESSION {
 public:
 	bool		active;
 	bool		chasing = false;
-	long long	chase_target_id = -1;
+	int	chase_target_id = -1;
+
+	int roam_dest_x = -1;
+	int roam_dest_y = -1;
+	int roam_tick = 0;
+
 	char		npc_type;
 	std::chrono::steady_clock::time_point next_move;
 	bool dead = false;
@@ -34,7 +39,7 @@ public:
 
 	void npc_move();
 
-	void take_damage(int damage, long long attacker_id) override;
+	void take_damage(int damage, int attacker_id) override;
 
 	void give_damage(SESSION* target, int damage) override;
 

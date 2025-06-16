@@ -1,14 +1,43 @@
-﻿  npc_session.cpp
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp(72,39): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/npc_session.cpp'을(를) 컴파일하는 중)
+﻿  session.cpp
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(59,10): warning C4477: 'printf' : 서식 문자열 '%d'에 'int' 형식의 인수가 필요하지만 variadic 인수 2의 형식이 'SOCKET'입니다.
+  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
+      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(59,10):
+      서식 문자열에서 '%lld'을(를) 사용하는 것이 좋습니다.
+      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(59,10):
+      서식 문자열에서 '%Id'을(를) 사용하는 것이 좋습니다.
+      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(59,10):
+      서식 문자열에서 '%I64d'을(를) 사용하는 것이 좋습니다.
   
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp(140,39): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/npc_session.cpp'을(를) 컴파일하는 중)
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(181,9): warning C4477: 'printf' : 서식 문자열 '%lld'에 '__int64' 형식의 인수가 필요하지만 variadic 인수 3의 형식이 'int'입니다.
+  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
+      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(181,9):
+      서식 문자열에서 '%d'을(를) 사용하는 것이 좋습니다.
+      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(181,9):
+      서식 문자열에서 '%I32d'을(를) 사용하는 것이 좋습니다.
   
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp(176,37): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/npc_session.cpp'을(를) 컴파일하는 중)
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(216,47): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
   
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp(181,40): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/npc_session.cpp'을(를) 컴파일하는 중)
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(241,38): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
   
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(244,10): warning C4477: 'printf' : 서식 문자열 '%lld'에 '__int64' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'int'입니다.
+  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
+      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(244,10):
+      서식 문자열에서 '%d'을(를) 사용하는 것이 좋습니다.
+      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(244,10):
+      서식 문자열에서 '%I32d'을(를) 사용하는 것이 좋습니다.
+  
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(285,27): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
+  
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(429,9): warning C4477: 'printf' : 서식 문자열 '%lld'에 '__int64' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'int'입니다.
+  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
+      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(429,9):
+      서식 문자열에서 '%d'을(를) 사용하는 것이 좋습니다.
+      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(429,9):
+      서식 문자열에서 '%I32d'을(를) 사용하는 것이 좋습니다.
+  
+  tile_map.cpp
+  코드를 생성하고 있습니다...
   server.vcxproj -> C:\Users\somin\OneDrive\GameServer_TermProject\server\x64\Debug\server.exe

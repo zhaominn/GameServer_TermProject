@@ -79,7 +79,7 @@ void DATABASE_MANAGER::CloseODBC_DB()
 }
 
 bool DATABASE_MANAGER::get_user_info(
-	long long user_id, std::string& out_name,
+	int user_id, std::string& out_name,
 	short& out_x, short& out_y, char& out_dir,
 	short& out_max_hp, short& out_hp, short& out_level, int& out_exp
 ) {
@@ -116,7 +116,7 @@ bool DATABASE_MANAGER::get_user_info(
 }
 
 bool DATABASE_MANAGER::insert_user_info(
-	long long user_id,
+	int user_id,
 	const std::string& name,
 	short x, short y, char dir,
 	short max_hp, short hp, short level, int exp
@@ -146,7 +146,7 @@ bool DATABASE_MANAGER::insert_user_info(
 
 
 bool DATABASE_MANAGER::update_user_info(
-	long long userid, int x, int y,
+	int userid, int x, int y,
 	char dir,
 	int max_hp, int hp,
 	int level, int exp,

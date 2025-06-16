@@ -6,14 +6,18 @@ using namespace std;
 unordered_map<long long, shared_ptr<SESSION>> Characters;
 unordered_map<long long, shared_ptr<NPC_SESSION>> npcs;
 
-atomic<long long> global_new_id = 0;
+atomic<int> global_new_id = 0;
 atomic<bool> npc_running = true;
 atomic<bool> autosave_running = true;
 
 SOCKET s_socket;
 mutex m_work, m_npc, m_autosave;
 
-std::unordered_map<long long, std::shared_ptr<Obstacle>> obstacles;
+std::unordered_map<int, std::shared_ptr<Obstacle>> obstacles;
+
+void InitializeTileMap() {
+	memset(tile_map, 0, sizeof(tile_map));
+}
 
 void InitializeObstacles() {
 	static std::random_device rd;
@@ -21,7 +25,7 @@ void InitializeObstacles() {
 	static std::uniform_int_distribution<> dist_x(0, MAP_WIDTH - 1);
 	static std::uniform_int_distribution<> dist_y(0, MAP_HEIGHT - 1);
 
-	long long next_obs_id = MAX_USER + NUM_MONSTER;
+	int next_obs_id = MAX_USER + NUM_MONSTER;
 	for (int i = 0; i < NUM_OBSTACLE; ++i) {
 		int x = dist_x(gen);
 		int y = dist_y(gen);
@@ -29,8 +33,10 @@ void InitializeObstacles() {
 		auto obs = std::make_shared<Obstacle>(next_obs_id++, x, y);
 		obstacles[obs->id] = obs; // map 등록
 		sector_manager.add_object(obs->id, x, y); // 섹터 등록
+		tile_map[x][y].state = 1;
 	}
 }
+
 
 void InitializeNPC()
 {
@@ -224,7 +230,8 @@ int main()
 
 	HANDLE hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(s_socket), hIOCP, -1, 0);
-
+	
+	InitializeTileMap();
 	InitializeObstacles();
 	InitializeNPC();
 	thread npc_thread(npc_thread_func);

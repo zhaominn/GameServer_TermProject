@@ -61,7 +61,7 @@ const int SECTOR_H = MAP_HEIGHT / SECTOR_SIZE + 1;
 struct sc_packet_avatar_info {
 	unsigned char size;
 	char type;
-	long long  id;
+	int  id;
 	short x, y;
 	short max_hp;
 	short hp;
@@ -72,7 +72,7 @@ struct sc_packet_avatar_info {
 struct sc_packet_move {
 	unsigned char size;
 	char type;
-	long long id;
+	int id;
 	short x, y;
 	char dir;
 };
@@ -80,7 +80,7 @@ struct sc_packet_move {
 struct sc_packet_enter {
 	unsigned char size;
 	char type;
-	long long  id;
+	int  id;
 	char name[MAX_ID_LENGTH];
 	char o_type;			
 	// 0 : PLAYER
@@ -96,13 +96,13 @@ struct sc_packet_enter {
 struct sc_packet_leave {
 	unsigned char size;
 	char type;
-	long long  id;
+	int  id;
 };
 
 struct sc_packet_chat {
 	unsigned char size;
 	char type;
-	long long  id;						// 메세지를 보낸 Object의 ID
+	int  id;						// 메세지를 보낸 Object의 ID
 	// -1 => SYSTEM MESSAGE
 	//       전투 메세지 보낼때 사용
 	char message[MAX_CHAT_LENGTH];		// NULL terminated 문자열
@@ -111,7 +111,7 @@ struct sc_packet_chat {
 struct sc_packet_stat_change {
 	unsigned char size;
 	char type;
-	long long  id;
+	int  id;
 	short hp;
 	short level;
 	int   exp;
@@ -120,7 +120,7 @@ struct sc_packet_stat_change {
 struct sc_packet_login_fail {
 	unsigned char size;
 	char type;
-	long long  id;
+	int  id;
 	char reason;			// 0 : 알수 없는 이유
 	// 1 : 다른 클라이언트에서 사용중
 	// 2 : 부적절한 ID (특수문자, 20자 이상)
@@ -130,7 +130,7 @@ struct sc_packet_login_fail {
 struct cs_packet_login {
 	unsigned char  size;
 	char  type;
-	long long  id;
+	int  id;
 };
 
 struct cs_packet_move {
