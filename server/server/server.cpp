@@ -16,15 +16,22 @@ mutex m_work, m_npc, m_autosave;
 std::unordered_map<long long, std::shared_ptr<Obstacle>> obstacles;
 
 void InitializeObstacles() {
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	static std::uniform_int_distribution<> dist_x(0, MAP_WIDTH - 1);
+	static std::uniform_int_distribution<> dist_y(0, MAP_HEIGHT - 1);
+
 	long long next_obs_id = MAX_USER + NUM_MONSTER;
 	for (int i = 0; i < NUM_OBSTACLE; ++i) {
-		int x = rand() % MAP_WIDTH;
-		int y = rand() % MAP_HEIGHT;
+		int x = dist_x(gen);
+		int y = dist_y(gen);
+
 		auto obs = std::make_shared<Obstacle>(next_obs_id++, x, y);
-		obstacles[obs->id] = obs; // 반드시 map에 등록
+		obstacles[obs->id] = obs; // map 등록
 		sector_manager.add_object(obs->id, x, y); // 섹터 등록
 	}
 }
+
 
 void InitializeNPC()
 {
