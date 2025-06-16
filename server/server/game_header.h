@@ -31,7 +31,7 @@ constexpr char MOVE_UP = 1;
 constexpr char MOVE_DOWN = 2;
 constexpr char MOVE_LEFT = 3;
 constexpr char MOVE_RIGHT = 4;
-constexpr unsigned short MOVE_DELAY_MS = 400; // 1초로조정해놔야하늬니라
+constexpr unsigned short MOVE_DELAY_MS = 200; // 1초로조정해놔야하늬니라
 constexpr unsigned short ATTACK_DELAY_MS = 200; // 1초로조정해놔야하늬니라
 
 constexpr unsigned short MAP_HEIGHT = 2000;

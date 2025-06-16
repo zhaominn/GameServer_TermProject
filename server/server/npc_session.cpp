@@ -44,7 +44,7 @@ void NPC_SESSION::peace_npc_move()
 		if (abs(target->x - x) + abs(target->y - y) == 1) {
 			give_damage(target.get(), ATTACK_POWER);
 
-			next_move = now + std::chrono::milliseconds(200 + rand() % 500);
+			next_move = now + std::chrono::milliseconds(100 + rand() % 300);
 			return;
 		}
 		else {
@@ -63,7 +63,7 @@ void NPC_SESSION::peace_npc_move()
 			}
 		}
 		if (blocked) {
-			next_move = now + std::chrono::milliseconds(200 + rand() % 500);
+			next_move = now + std::chrono::milliseconds(100 + rand() % 300);
 			return;
 		}
 		x = nx; y = ny;
@@ -72,7 +72,7 @@ void NPC_SESSION::peace_npc_move()
 				u.second->send_move_player_packet(id);
 	}
 	else {
-		next_move = now + std::chrono::milliseconds(200 + rand() % 2000);
+		next_move = now + std::chrono::milliseconds(200 + rand() % 1000);
 		return;
 	}
 }
@@ -103,7 +103,7 @@ void NPC_SESSION::agro_npc_move()
 		if (abs(dx) + abs(dy) == 1) {
 			give_damage(target.get(), ATTACK_POWER);
 
-			next_move = now + std::chrono::milliseconds(200 + rand() % 500);
+			next_move = now + std::chrono::milliseconds(100 + rand() % 300);
 			return;
 		}
 
@@ -127,7 +127,7 @@ void NPC_SESSION::agro_npc_move()
 			}
 		}
 		if (blocked) {
-			next_move = now + std::chrono::milliseconds(200 + rand() % 1000);
+			next_move = now + std::chrono::milliseconds(100 + rand() % 300);
 			return;
 		}
 
@@ -153,7 +153,7 @@ void NPC_SESSION::roaming_peace_npc_move() {
 		if (abs(target->x - x) + abs(target->y - y) == 1) {
 			give_damage(target.get(), ATTACK_POWER);
 
-			next_move = now + std::chrono::milliseconds(200 + rand() % 500);
+			next_move = now + std::chrono::milliseconds(100 + rand() % 300);
 			return;
 		}
 		else {
@@ -172,7 +172,7 @@ void NPC_SESSION::roaming_peace_npc_move() {
 			}
 		}
 		if (blocked) {
-			next_move = now + std::chrono::milliseconds(200 + rand() % 500);
+			next_move = now + std::chrono::milliseconds(100 + rand() % 300);
 			return;
 		}
 		x = nx; y = ny;
@@ -307,7 +307,7 @@ void NPC_SESSION::npc_move() {
 		}
 	}
 
-	next_move = std::chrono::steady_clock::now() + std::chrono::milliseconds(100 + (rand() % 5000));
+	next_move = std::chrono::steady_clock::now() + std::chrono::milliseconds(100 + (rand() % 1000));
 }
 
 void NPC_SESSION::take_damage(int damage, int attacker_id) {

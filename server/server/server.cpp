@@ -37,7 +37,6 @@ void InitializeObstacles() {
 	}
 }
 
-
 void InitializeNPC()
 {
 	cout << "NPC intialize begin.\n";
