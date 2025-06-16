@@ -4,7 +4,9 @@
 SQLHENV g_henv = NULL;
 SQLHDBC g_hdbc = NULL;
 
-void HandleDiagnosticRecord(SQLHANDLE hHandle, SQLSMALLINT hType, RETCODE RetCode)
+DATABASE_MANAGER database_manager;
+
+void DATABASE_MANAGER::HandleDiagnosticRecord(SQLHANDLE hHandle, SQLSMALLINT hType, RETCODE RetCode)
 {
 	SQLSMALLINT iRec = 0;
 	SQLINTEGER iError;
@@ -22,7 +24,7 @@ void HandleDiagnosticRecord(SQLHANDLE hHandle, SQLSMALLINT hType, RETCODE RetCod
 	}
 }
 
-bool InitODBC_DB()
+bool DATABASE_MANAGER::InitODBC_DB()
 {
 	SQLRETURN ret;
 
@@ -62,7 +64,7 @@ bool InitODBC_DB()
 	return true;
 }
 
-void CloseODBC_DB()
+void DATABASE_MANAGER::CloseODBC_DB()
 {
 	if (g_hdbc) {
 		SQLDisconnect(g_hdbc);
@@ -76,7 +78,7 @@ void CloseODBC_DB()
 	std::cout << "DB 종료!\n";
 }
 
-bool db_get_user_info(
+bool DATABASE_MANAGER::get_user_info(
 	long long user_id, std::string& out_name,
 	short& out_x, short& out_y, char& out_dir,
 	short& out_max_hp, short& out_hp, short& out_level, int& out_exp
@@ -113,7 +115,7 @@ bool db_get_user_info(
 	return false;
 }
 
-bool db_insert_user_info(
+bool DATABASE_MANAGER::insert_user_info(
 	long long user_id,
 	const std::string& name,
 	short x, short y, char dir,
@@ -143,7 +145,7 @@ bool db_insert_user_info(
 }
 
 
-bool db_update_user_info(
+bool DATABASE_MANAGER::update_user_info(
 	long long userid, int x, int y,
 	char dir,
 	int max_hp, int hp,

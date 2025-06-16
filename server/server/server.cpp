@@ -93,7 +93,7 @@ void autosave_thread_func() {
 		printf("[오토DB세이브] 전체 세션/플레이어 DB 업데이트 시작\n");
 		for (auto& kv : Characters) {
 			auto& session = kv.second;
-			db_update_user_info(
+			database_manager.update_user_info(
 				session->id,
 				session->x,
 				session->y,
@@ -192,7 +192,7 @@ int main()
 {
 	std::wcout.imbue(std::locale("korean"));
 
-	if (!InitODBC_DB()) {
+	if (!database_manager.InitODBC_DB()) {
 		cerr << "ODBC DB 초기화/연결 실패! 서버 실행 중단" << endl;
 		return -1;
 	}
@@ -245,6 +245,6 @@ int main()
 	closesocket(s_socket);
 	WSACleanup();
 
-	CloseODBC_DB();
+	database_manager.CloseODBC_DB();
 	return 0;
 }

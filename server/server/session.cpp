@@ -15,7 +15,7 @@ SESSION::SESSION(long long session_id, SOCKET s) : id(session_id), socket(s)
 
 SESSION::~SESSION()
 {
-	db_update_user_info(id, x, y, dir, max_hp, hp, level, exp, name);
+	database_manager.update_user_info(id, x, y, dir, max_hp, hp, level, exp, name);
 
 	sc_packet_leave leave_packet;
 	leave_packet.size = sizeof(leave_packet);
@@ -213,7 +213,7 @@ void SESSION::process_packet(unsigned char* p)
 		int db_exp;
 
 		long long my_id = id;
-		bool found = db_get_user_info(my_id, db_name, db_x, db_y, db_dir, db_maxhp, db_hp, db_level, db_exp);
+		bool found = database_manager.get_user_info(my_id, db_name, db_x, db_y, db_dir, db_maxhp, db_hp, db_level, db_exp);
 
 		if (found) {
 			// -- DB정보 불러오기 성공(기존유저)
@@ -238,7 +238,7 @@ void SESSION::process_packet(unsigned char* p)
 			hp = PLAYER_MAX_HP;
 			level = 1;
 			exp = 50;
-			db_insert_user_info(my_id, name, x, y, dir, max_hp, hp, level, exp);
+			database_manager.insert_user_info(my_id, name, x, y, dir, max_hp, hp, level, exp);
 		}
 
 		printf("client[%lld] %s login\n", id, name.c_str());
@@ -427,5 +427,5 @@ bool SESSION::can_see_obstacle(const int x, const int y) const {
 
 void SESSION::on_logout() {
 	printf("client[%lld] %s logout\n", id, name.c_str());
-	db_update_user_info(id, x, y, dir, max_hp, hp, level, exp, name);
+	database_manager.update_user_info(id, x, y, dir, max_hp, hp, level, exp, name);
 }
