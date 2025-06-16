@@ -15,6 +15,8 @@ SESSION::SESSION(long long session_id, SOCKET s) : id(session_id), socket(s)
 
 SESSION::~SESSION()
 {
+	db_update_user_info(id, x, y, dir, max_hp, hp, level, exp, name);
+
 	sc_packet_leave leave_packet;
 	leave_packet.size = sizeof(leave_packet);
 	leave_packet.type = S2C_P_LEAVE;
@@ -185,11 +187,15 @@ void SESSION::give_damage(SESSION* target, int damage) {
 
 void SESSION::plus_exp(int size) {
 	exp += size;
-	if (exp >= level * 100) {
+
+	while (exp >= level * 100) {
+		// exp -= level * 100; // 현재 레벨업에 필요한 경험치만큼 차감
 		++level;
-		printf("[%s] %d레벨로 레벨업하고 %d의 hp를 얻었습니다.\n", name.c_str(), level, level * 10);
-		hp += level * 10;
+		printf("[%s] %d레벨로 레벨업하고 %d의 hp를 얻었습니다.\n",
+			name.c_str(), level, level * 10);
+		hp = min(100, hp + level * 10);
 	}
+
 	send_state_change_packet();
 }
 
@@ -200,12 +206,38 @@ void SESSION::process_packet(unsigned char* p)
 	case C2S_P_LOGIN:
 	{
 		cs_packet_login* packet = reinterpret_cast<cs_packet_login*>(p);
-		name = packet->name;
-		x = rand() % MAP_WIDTH;
-		y = rand() % MAP_HEIGHT;;
-		level = 1;
-		hp = PLAYER_MAX_HP;
-		exp = 99;
+
+		std::string db_name;
+		short db_x, db_y, db_maxhp, db_hp, db_level;
+		char db_dir;
+		int db_exp;
+
+		long long my_id = id;
+		bool found = db_get_user_info(my_id, db_name, db_x, db_y, db_dir, db_maxhp, db_hp, db_level, db_exp);
+
+		if (found) {
+			// -- DB정보 불러오기 성공(기존유저)
+			name = db_name;
+			x = db_x;
+			y = db_y;
+			dir = db_dir;
+			max_hp = db_maxhp;
+			hp = db_hp;
+			level = db_level;
+			exp = db_exp;
+		}
+		else {
+			name = packet->name; // 클라에서 받은 name
+			x = rand() % MAP_WIDTH;
+			y = rand() % MAP_HEIGHT;
+			dir = 1;
+			max_hp = PLAYER_MAX_HP;
+			hp = PLAYER_MAX_HP;
+			level = 1;
+			exp = 50;
+			db_insert_user_info(my_id, name, x, y, dir, max_hp, hp, level, exp);
+		}
+
 		printf("client[%lld] %s login\n", id, name.c_str());
 		send_player_info();
 
@@ -217,9 +249,9 @@ void SESSION::process_packet(unsigned char* p)
 		enter_packet.o_type = 0; // player
 		enter_packet.x = x;
 		enter_packet.y = y;
-
 		add_object(id, x, y);
 
+		// 기존 AOI + view_list 동기화 과정
 		for (auto& c : Characters) {
 			if (c.first != id && can_see(*c.second)) {
 				c.second->send_packet(&enter_packet);
@@ -249,7 +281,6 @@ void SESSION::process_packet(unsigned char* p)
 			}
 			send_add_player_packet(vid);
 		}
-
 		break;
 	}
 	case C2S_P_MOVE:
@@ -353,7 +384,7 @@ void SESSION::process_packet(unsigned char* p)
 				}
 			}
 			for (auto it = npcs.begin(); it != npcs.end(); ) {
-				if (it->second->x == tx && it->second->y == ty) {
+				if (it->second->x == tx && it->second->y == ty && !it->second->dead) {
 					give_damage(it->second.get(), ATTACK_POWER);
 					break;
 				}
@@ -375,7 +406,6 @@ void SESSION::process_packet(unsigned char* p)
 		send_state_change_packet(); // ← 클라/주변에 HP/EXP 갱신
 		break;
 	}
-
 	default:
 		std::cout << "Error Invalid Packet Type\n";
 		exit(-1);
@@ -390,4 +420,8 @@ bool SESSION::can_see(const SESSION& other) const {
 bool SESSION::can_see_obstacle(const int x, const int y) const {
 	return abs(this->x - x) <= VIEW_RANGE
 		&& abs(this->y - y) <= VIEW_RANGE;
+}
+
+void SESSION::on_logout() {
+	db_update_user_info(id, x, y, dir, max_hp, hp, level, exp, name);
 }

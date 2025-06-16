@@ -8,6 +8,7 @@ unordered_map<long long, shared_ptr<NPC_SESSION>> npcs;
 
 atomic<long long> global_new_id = 0;
 atomic<bool> npc_running = true;
+atomic<bool> autosave_running = true;
 
 SOCKET s_socket;
 mutex m_characters;
@@ -89,6 +90,29 @@ void npc_thread_func() {
 	}
 }
 
+void autosave_thread_func() {
+	while (autosave_running) {
+		std::this_thread::sleep_for(std::chrono::minutes(2)); // 2분마다 일괄 저장
+
+		std::lock_guard<std::mutex> lock(m_characters);
+		printf("[오토DB세이브] 전체 세션/플레이어 DB 업데이트 시작\n");
+		for (auto& kv : Characters) {
+			auto& session = kv.second;
+			db_update_user_info(
+				session->id,
+				session->x,
+				session->y,
+				session->dir,
+				session->max_hp,
+				session->hp,
+				session->level,
+				session->exp,
+				session->name
+			);
+		}
+	}
+}
+
 void work_thread(HANDLE hIOCP) {
 	while (true) {
 		DWORD io_size;
@@ -103,8 +127,10 @@ void work_thread(HANDLE hIOCP) {
 			std::lock_guard<std::mutex> lock(m_characters);
 
 			if ((eo->io_type == RECV || eo->io_type == SEND) && (0 == io_size)) {
-				if (Characters.count(key) != 0)
+				if (Characters.count(key) != 0) {
+					Characters[key]->on_logout();
 					Characters.erase(key);
+				}
 				delete eo;
 				continue;
 			}
@@ -163,12 +189,18 @@ void work_thread(HANDLE hIOCP) {
 			break;
 		}
 		}
+
 	}
 }
 
 int main()
 {
 	std::wcout.imbue(std::locale("korean"));
+
+	if (!InitODBC_DB()) {
+		cerr << "ODBC DB 초기화/연결 실패! 서버 실행 중단" << endl;
+		return -1;
+	}
 
 	WSADATA WSAData;
 	if (WSAStartup(MAKEWORD(2, 2), &WSAData) != 0) {
@@ -195,6 +227,7 @@ int main()
 	InitializeObstacles();
 	InitializeNPC();
 	thread npc_thread(npc_thread_func);
+	thread autosave_thread(autosave_thread_func);
 	do_accept();
 
 	int worker_cnt = std::thread::hardware_concurrency();
@@ -209,7 +242,14 @@ int main()
 	npc_running = false;
 	npc_thread.join();
 
+	autosave_running = false;
+	autosave_thread.join();
+
+	for (auto& sess : Characters)
+		sess.second->on_logout();
 	closesocket(s_socket);
 	WSACleanup();
+
+	CloseODBC_DB();
 	return 0;
 }

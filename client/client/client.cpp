@@ -130,6 +130,7 @@ void process_packet(char* ptr)
 		player.level = packet->level;
 		player.exp = packet->exp;
 		player.can_see = true;
+		make_id = true;
 		break;
 	}
 	case S2C_P_ENTER:
@@ -469,7 +470,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			int bar_left = UI_LEFT;
 			int bar_top = UI_TOP + UI_LINE * 5;
 			int bar_width = 120;
-			int max_exp = player.level * 100;
+			int max_exp = int(player.level * 100);
 			int exp_w = (player.exp * bar_width) / max_exp;
 
 
@@ -532,7 +533,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					player.name[sizeof(player.name) - 1] = '\0';
 				}
 				logIn();
-				make_id = true;
 				id_len = 0; id_buffer[0] = '\0';
 			}
 			else if (id_len < MAX_ID_LENGTH - 1 && isprint((char)wParam)) {

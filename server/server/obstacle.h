@@ -1,5 +1,5 @@
 #pragma once
-#include "session.h"
+#include "sector_manager.h"
 
 class Obstacle {
 public:

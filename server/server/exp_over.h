@@ -1,5 +1,5 @@
 #pragma once
-#include "sector.h"
+#include "tile_map.h"
 
 enum IO_TYPE { RECV, SEND, ACCEPT };
 

@@ -1,37 +1,37 @@
 ﻿  client.cpp
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(138,10): warning C4244: '초기화 중': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(186,16): warning C4244: '초기화 중': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(224,23): warning C4244: '인수': '__int64'에서 'const int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(225,9): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(139,10): warning C4244: '초기화 중': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(187,16): warning C4244: '초기화 중': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(225,23): warning C4244: '인수': '__int64'에서 'const int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(226,9): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(227,9): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(228,13): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(229,10): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(228,9): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(229,13): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(230,10): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(233,29): warning C4244: '인수': '__int64'에서 'const int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(234,15): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(231,10): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(234,29): warning C4244: '인수': '__int64'에서 'const int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(235,15): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(236,15): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(237,19): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(238,16): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(237,15): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(238,19): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(239,16): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(247,16): warning C4244: '초기화 중': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(353,12): warning C4244: 'return': 'WPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(403,92): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(418,55): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(438,55): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(457,23): warning C4477: 'swprintf' : 서식 문자열 '%d'에 'int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 '__int64'입니다.
-      C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(457,23):
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(240,16): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(248,16): warning C4244: '초기화 중': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(354,12): warning C4244: 'return': 'WPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(404,92): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(419,55): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(439,55): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(458,23): warning C4477: 'swprintf' : 서식 문자열 '%d'에 'int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 '__int64'입니다.
+      C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(458,23):
       서식 문자열에서 '%lld'을(를) 사용하는 것이 좋습니다.
-      C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(457,23):
+      C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(458,23):
       서식 문자열에서 '%Id'을(를) 사용하는 것이 좋습니다.
-      C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(457,23):
+      C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(458,23):
       서식 문자열에서 '%I64d'을(를) 사용하는 것이 좋습니다.
   
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(458,61): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(460,61): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(462,61): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(464,61): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(466,61): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(488,61): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(459,61): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(461,61): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(463,61): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(465,61): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(467,61): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\client\client\client.cpp(489,61): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   client.vcxproj -> C:\Users\somin\OneDrive\GameServer_TermProject\client\x64\Debug\client.exe

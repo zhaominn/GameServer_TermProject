@@ -125,6 +125,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="database_manager.h" />
     <ClInclude Include="exp_over.h" />
     <ClInclude Include="game_header.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -132,20 +133,23 @@
     <ClInclude Include="npc_session.h" />
     <ClInclude Include="obstacle.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="sector.h" />
+    <ClInclude Include="sector_manager.h" />
     <ClInclude Include="session.h" />
+    <ClInclude Include="tile_map.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="database_manager.cpp" />
     <ClCompile Include="npc_session.cpp" />
     <ClCompile Include="obstacle.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="sector.cpp" />
+    <ClCompile Include="sector_manager.cpp" />
     <ClCompile Include="server.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="session.cpp" />
+    <ClCompile Include="tile_map.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

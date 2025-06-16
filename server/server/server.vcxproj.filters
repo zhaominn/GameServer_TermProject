@@ -27,13 +27,19 @@
     <ClInclude Include="npc_session.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="sector.h">
+    <ClInclude Include="sector_manager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="obstacle.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="database_manager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="tile_map.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,10 +56,16 @@
     <ClCompile Include="pch.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="sector.cpp">
+    <ClCompile Include="sector_manager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="obstacle.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="database_manager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="tile_map.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
