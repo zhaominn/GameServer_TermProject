@@ -42,15 +42,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 184,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
             },
             {
               "$type": "Document",
@@ -62,8 +58,7 @@
               "RelativeToolTip": "server\\server.cpp",
               "ViewState": "AgIAACYAAAAAAAAAAAAUwEgAAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-06-16T15:11:41.115Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-16T15:11:41.115Z"
             },
             {
               "$type": "Document",
@@ -73,7 +68,7 @@
               "RelativeDocumentMoniker": "server\\npc_session.cpp",
               "ToolTip": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\npc_session.cpp",
               "RelativeToolTip": "server\\npc_session.cpp",
-              "ViewState": "AgIAAPkAAAAAAAAAAAAUwBUBAAAQAAAAAAAAAA==",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAkwPkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-06-16T15:10:59.432Z",
               "EditorCaption": ""
@@ -84,9 +79,9 @@
               "Title": "session.cpp",
               "DocumentMoniker": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\session.cpp",
               "RelativeDocumentMoniker": "server\\session.cpp",
-              "ToolTip": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\session.cpp*",
-              "RelativeToolTip": "server\\session.cpp*",
-              "ViewState": "AgIAAGwBAAAAAAAAAAAAAKYBAAAAAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\session.cpp",
+              "RelativeToolTip": "server\\session.cpp",
+              "ViewState": "AgIAAFcAAAAAAAAAAAAkwLoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-06-16T11:23:10.064Z",
               "EditorCaption": ""
@@ -101,8 +96,7 @@
               "RelativeToolTip": "server\\sector_manager.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-06-16T15:05:05.481Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-16T15:05:05.481Z"
             },
             {
               "$type": "Document",
@@ -114,8 +108,7 @@
               "RelativeToolTip": "server\\sector_manager.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-06-16T15:05:00.281Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-16T15:05:00.281Z"
             },
             {
               "$type": "Document",
@@ -127,8 +120,7 @@
               "RelativeToolTip": "server\\database_manager.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-06-16T15:05:01.104Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-16T15:05:01.104Z"
             },
             {
               "$type": "Document",
@@ -140,8 +132,7 @@
               "RelativeToolTip": "server\\database_manager.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-06-16T11:20:26.731Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-16T11:20:26.731Z"
             },
             {
               "$type": "Document",

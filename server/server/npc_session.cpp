@@ -238,6 +238,8 @@ void NPC_SESSION::take_damage(int damage, long long attacker_id) {
 		npc_die();
 		int exp_size = Characters[attacker_id]->level * Characters[attacker_id]->level * 2 * npc_type;
 		Characters[attacker_id]->plus_exp(exp_size);
+		printf("[%s]  -> [%s] (id:%lld) : 무찌르고 %d 경험치를 얻었습니다.\n",
+			Characters[attacker_id]->name.c_str(), name.c_str(), id, exp_size);
 	}
 
 	if (npc_type == 1 && !chasing && Characters.count(attacker_id)) {

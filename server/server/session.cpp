@@ -189,7 +189,6 @@ void SESSION::plus_exp(int size) {
 	exp += size;
 
 	while (exp >= level * 100) {
-		// exp -= level * 100; // 현재 레벨업에 필요한 경험치만큼 차감
 		++level;
 		printf("[%s] %d레벨로 레벨업하고 %d의 hp를 얻었습니다.\n",
 			name.c_str(), level, level * 10);

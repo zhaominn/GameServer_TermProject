@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{220E51AF-436D-421C-AF01-D79F78676274}|server\\server.vcxproj|C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\npc_session.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{220E51AF-436D-421C-AF01-D79F78676274}|server\\server.vcxproj|solutionrelative:server\\npc_session.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{220E51AF-436D-421C-AF01-D79F78676274}|server\\server.vcxproj|C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\session.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{220E51AF-436D-421C-AF01-D79F78676274}|server\\server.vcxproj|solutionrelative:server\\session.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{220E51AF-436D-421C-AF01-D79F78676274}|server\\server.vcxproj|C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\npc_session.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{220E51AF-436D-421C-AF01-D79F78676274}|server\\server.vcxproj|solutionrelative:server\\npc_session.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{220E51AF-436D-421C-AF01-D79F78676274}|server\\server.vcxproj|C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\server.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -49,10 +49,6 @@
               "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
-            },
-            {
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "server.cpp",
@@ -62,31 +58,30 @@
               "RelativeToolTip": "server\\server.cpp",
               "ViewState": "AgIAACYAAAAAAAAAAAAUwEgAAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-06-16T15:11:41.115Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-16T15:11:41.115Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "npc_session.cpp",
               "DocumentMoniker": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\npc_session.cpp",
               "RelativeDocumentMoniker": "server\\npc_session.cpp",
               "ToolTip": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\npc_session.cpp",
               "RelativeToolTip": "server\\npc_session.cpp",
-              "ViewState": "AgIAABIAAAAAAAAAAAAqwO8AAAAuAAAAAAAAAA==",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAkwPkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-06-16T15:10:59.432Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "session.cpp",
               "DocumentMoniker": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\session.cpp",
               "RelativeDocumentMoniker": "server\\session.cpp",
               "ToolTip": "C:\\Users\\somin\\OneDrive\\GameServer_TermProject\\server\\server\\session.cpp",
               "RelativeToolTip": "server\\session.cpp",
-              "ViewState": "AgIAALIAAAAAAAAAAAAAALsAAAAWAAAAAAAAAA==",
+              "ViewState": "AgIAAFcAAAAAAAAAAAAkwLkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-06-16T11:23:10.064Z",
               "EditorCaption": ""
@@ -101,8 +96,7 @@
               "RelativeToolTip": "server\\sector_manager.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-06-16T15:05:05.481Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-16T15:05:05.481Z"
             },
             {
               "$type": "Document",
@@ -114,8 +108,7 @@
               "RelativeToolTip": "server\\sector_manager.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-06-16T15:05:00.281Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-16T15:05:00.281Z"
             },
             {
               "$type": "Document",
@@ -127,8 +120,7 @@
               "RelativeToolTip": "server\\database_manager.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-06-16T15:05:01.104Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-16T15:05:01.104Z"
             },
             {
               "$type": "Document",
@@ -140,8 +132,7 @@
               "RelativeToolTip": "server\\database_manager.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-06-16T11:20:26.731Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-16T11:20:26.731Z"
             },
             {
               "$type": "Document",
