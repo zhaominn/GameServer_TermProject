@@ -1,6 +1,4 @@
-﻿  pch.cpp
-  database_manager.cpp
-  npc_session.cpp
+﻿  npc_session.cpp
 C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp(78,37): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   (소스 파일 '/npc_session.cpp'을(를) 컴파일하는 중)
   
@@ -22,10 +20,8 @@ C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp(219
 C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp(224,40): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   (소스 파일 '/npc_session.cpp'을(를) 컴파일하는 중)
   
-  obstacle.cpp
-  sector_manager.cpp
   server.cpp
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\server.cpp(85,43): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\server.cpp(81,43): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   (소스 파일 '/server.cpp'을(를) 컴파일하는 중)
   
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(476,82): warning C4244: '인수': '_Ty'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
@@ -51,34 +47,5 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.3520
               _Ty=Obstacle
           ]
   
-  session.cpp
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(59,10): warning C4477: 'printf' : 서식 문자열 '%d'에 'int' 형식의 인수가 필요하지만 variadic 인수 2의 형식이 'SOCKET'입니다.
-  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
-      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(59,10):
-      서식 문자열에서 '%lld'을(를) 사용하는 것이 좋습니다.
-      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(59,10):
-      서식 문자열에서 '%Id'을(를) 사용하는 것이 좋습니다.
-      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(59,10):
-      서식 문자열에서 '%I64d'을(를) 사용하는 것이 좋습니다.
-  
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(286,27): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
-  
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(336,27): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
-  
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(343,46): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
-  
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(351,28): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
-  
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(356,31): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
-  
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(358,48): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
-  
-  tile_map.cpp
   코드를 생성하고 있습니다...
   server.vcxproj -> C:\Users\somin\OneDrive\GameServer_TermProject\server\x64\Debug\server.exe

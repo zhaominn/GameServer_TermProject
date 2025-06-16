@@ -235,9 +235,9 @@ void NPC_SESSION::take_damage(int damage, long long attacker_id) {
 	hp -= damage;
 	if (hp < 0) {
 		hp = 0;
+		npc_die();
 		int exp_size = Characters[attacker_id]->level * Characters[attacker_id]->level * 2 * npc_type;
 		Characters[attacker_id]->plus_exp(exp_size);
-		npc_die();
 	}
 
 	if (npc_type == 1 && !chasing && Characters.count(attacker_id)) {
@@ -256,20 +256,22 @@ void NPC_SESSION::give_damage(SESSION* target, int damage) {
 }
 
 void NPC_SESSION::npc_die() {
-	// 기존 LEAVE 패킷/컨테이너 erase 전...
-
 	active = false;
 	dead = true;
 	respawn_time = std::chrono::steady_clock::now() + std::chrono::seconds(30);
 
 	// 나머지 기존 remove_npc 코드 실행
-	sc_packet_leave packet;
+	sc_packet_stat_change packet;
 	packet.size = sizeof(packet);
-	packet.type = S2C_P_LEAVE;
+	packet.type = S2C_P_STAT_CHANGE;
 	packet.id = id;
+	packet.hp = hp;
+	packet.level = level;
+	packet.exp = exp;
 
 	for (auto& c : Characters) {
 		if (c.second->view_list.count(id)) {
+			c.second->send_packet(&packet);
 			c.second->view_list.erase(id);
 		}
 	}
