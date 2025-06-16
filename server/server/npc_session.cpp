@@ -275,5 +275,5 @@ void NPC_SESSION::npc_die() {
 			c.second->view_list.erase(id);
 		}
 	}
-	remove_object(id, x, y);
+	sector_manager.remove_object(id, x, y);
 }

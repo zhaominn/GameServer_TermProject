@@ -25,7 +25,7 @@ SESSION::~SESSION()
 		if (id != c.first)
 			c.second->send_packet(&leave_packet);
 	}
-	remove_object(id, x, y);
+	sector_manager.remove_object(id, x, y);
 	closesocket(socket);
 }
 
@@ -253,7 +253,7 @@ void SESSION::process_packet(unsigned char* p)
 		enter_packet.o_type = 0; // player
 		enter_packet.x = x;
 		enter_packet.y = y;
-		add_object(id, x, y);
+		sector_manager.add_object(id, x, y);
 
 		// 기존 AOI + view_list 동기화 과정
 		for (auto& c : Characters) {
@@ -315,7 +315,7 @@ void SESSION::process_packet(unsigned char* p)
 		}
 
 		std::set<long long> candidate_ids;
-		get_aoi_candidates(x, y, candidate_ids);
+		sector_manager.get_aoi_candidates(x, y, candidate_ids);
 		std::set<long long> near_list;
 		std::set<long long> old_vlist = view_list;
 
@@ -332,7 +332,7 @@ void SESSION::process_packet(unsigned char* p)
 			}
 		}
 
-		move_object(id, old_x, old_y, x, y);
+		sector_manager.move_object(id, old_x, old_y, x, y);
 		send_move_player_packet(id);
 
 		for (auto nl : near_list) {
@@ -427,5 +427,6 @@ bool SESSION::can_see_obstacle(const int x, const int y) const {
 }
 
 void SESSION::on_logout() {
+	printf("client[%lld] %s logout\n", id, name.c_str());
 	db_update_user_info(id, x, y, dir, max_hp, hp, level, exp, name);
 }

@@ -11,7 +11,7 @@ atomic<bool> npc_running = true;
 atomic<bool> autosave_running = true;
 
 SOCKET s_socket;
-mutex m_characters;
+mutex m_work, m_npc, m_autosave;
 
 std::unordered_map<long long, std::shared_ptr<Obstacle>> obstacles;
 
@@ -22,7 +22,7 @@ void InitializeObstacles() {
 		int y = rand() % MAP_HEIGHT;
 		auto obs = std::make_shared<Obstacle>(next_obs_id++, x, y);
 		obstacles[obs->id] = obs; // 반드시 map에 등록
-		add_object(obs->id, x, y); // 섹터 등록
+		sector_manager.add_object(obs->id, x, y); // 섹터 등록
 	}
 }
 
@@ -32,7 +32,7 @@ void InitializeNPC()
 	for (int i = 0; i < NUM_MONSTER; ++i) {
 		int npc_id = MAX_USER + i;
 		npcs[npc_id] = make_shared<NPC_SESSION>(npc_id, "NPC" + std::to_string(i));
-		add_object(npcs[npc_id]->id, npcs[npc_id]->x, npcs[npc_id]->y);
+		sector_manager.add_object(npcs[npc_id]->id, npcs[npc_id]->x, npcs[npc_id]->y);
 	}
 	cout << "NPC initialize end.\n";
 }
@@ -64,7 +64,7 @@ void npc_thread_func() {
 	while (npc_running) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(500)); // 0.5초마다
 
-		std::lock_guard<std::mutex> lock(m_characters);
+		std::lock_guard<std::mutex> lock(m_npc);
 		for (auto& it : npcs) {
 			auto& npc = it.second;
 
@@ -73,7 +73,7 @@ void npc_thread_func() {
 				npc->active = true;
 				npc->dead = false;
 
-				add_object(npc->id, npc->x, npc->y);
+				sector_manager.add_object(npc->id, npc->x, npc->y);
 				printf("[%s] (id:%lld) 부활! x=%d y=%d\n", npc->name.c_str(), npc->id, npc->x, npc->y);
 
 				for (auto& c : Characters)
@@ -89,7 +89,7 @@ void autosave_thread_func() {
 	while (autosave_running) {
 		std::this_thread::sleep_for(std::chrono::minutes(2)); // 2분마다 일괄 저장
 
-		std::lock_guard<std::mutex> lock(m_characters);
+		std::lock_guard<std::mutex> lock(m_autosave);
 		printf("[오토DB세이브] 전체 세션/플레이어 DB 업데이트 시작\n");
 		for (auto& kv : Characters) {
 			auto& session = kv.second;
@@ -119,7 +119,7 @@ void work_thread(HANDLE hIOCP) {
 		EXP_OVER* eo = reinterpret_cast<EXP_OVER*>(over);
 
 		{
-			std::lock_guard<std::mutex> lock(m_characters);
+			std::lock_guard<std::mutex> lock(m_work);
 
 			if ((eo->io_type == RECV || eo->io_type == SEND) && (0 == io_size)) {
 				if (Characters.count(key) != 0) {
@@ -137,7 +137,7 @@ void work_thread(HANDLE hIOCP) {
 			CreateIoCompletionPort(reinterpret_cast<HANDLE>(eo->accept_socket), hIOCP, session_id, 0);
 
 			{
-				std::lock_guard<std::mutex> lock(m_characters);
+				std::lock_guard<std::mutex> lock(m_work);
 				Characters.emplace(session_id, std::make_shared<SESSION>(session_id, eo->accept_socket));
 			}
 
@@ -155,7 +155,7 @@ void work_thread(HANDLE hIOCP) {
 		{
 			std::shared_ptr<SESSION> character;
 			{
-				std::lock_guard<std::mutex> lock(m_characters);
+				std::lock_guard<std::mutex> lock(m_work);
 				auto it = Characters.find(key);
 				if (it == Characters.end()) {
 					delete eo;

@@ -1,51 +1,29 @@
-﻿  npc_session.cpp
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp(78,37): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/npc_session.cpp'을(를) 컴파일하는 중)
+﻿  session.cpp
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(59,10): warning C4477: 'printf' : 서식 문자열 '%d'에 'int' 형식의 인수가 필요하지만 variadic 인수 2의 형식이 'SOCKET'입니다.
+  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
+      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(59,10):
+      서식 문자열에서 '%lld'을(를) 사용하는 것이 좋습니다.
+      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(59,10):
+      서식 문자열에서 '%Id'을(를) 사용하는 것이 좋습니다.
+      C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(59,10):
+      서식 문자열에서 '%I64d'을(를) 사용하는 것이 좋습니다.
   
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp(83,40): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/npc_session.cpp'을(를) 컴파일하는 중)
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(286,27): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
   
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp(88,38): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/npc_session.cpp'을(를) 컴파일하는 중)
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(336,27): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
   
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp(137,40): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/npc_session.cpp'을(를) 컴파일하는 중)
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(343,46): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
   
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp(204,40): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/npc_session.cpp'을(를) 컴파일하는 중)
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(351,28): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
   
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp(219,37): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/npc_session.cpp'을(를) 컴파일하는 중)
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(356,31): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
   
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp(224,40): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/npc_session.cpp'을(를) 컴파일하는 중)
+C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp(358,48): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  (소스 파일 '/session.cpp'을(를) 컴파일하는 중)
   
-  server.cpp
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\server.cpp(81,43): warning C4244: '인수': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 '/server.cpp'을(를) 컴파일하는 중)
-  
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(476,82): warning C4244: '인수': '_Ty'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(476,82): warning C4244:         with
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(476,82): warning C4244:         [
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(476,82): warning C4244:             _Ty=__int64
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(476,82): warning C4244:         ]
-  (소스 파일 '/server.cpp'을(를) 컴파일하는 중)
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(476,82):
-      템플릿 인스턴스화 컨텍스트(가장 오래된 인스턴스화 컨텍스트)가
-          C:\Users\somin\OneDrive\GameServer_TermProject\server\server\server.cpp(23,19):
-          컴파일되는 함수 템플릿 인스턴스화 'std::shared_ptr<Obstacle> std::make_shared<Obstacle,__int64,int&,int&>(__int64 &&,int &,int &)'에 대한 참조를 확인하세요.
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(2913,46):
-          컴파일되는 함수 템플릿 인스턴스화 'std::_Ref_count_obj2<Obstacle>::_Ref_count_obj2<_Ty,int&,int&>(_Ty &&,int &,int &)'에 대한 참조를 확인하세요.
-          with
-          [
-              _Ty=__int64
-          ]
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(2100,18):
-          컴파일되는 함수 템플릿 인스턴스화 'void std::_Construct_in_place<_Ty,__int64,int&,int&>(_Ty &,__int64 &&,int &,int &) noexcept(false)'에 대한 참조를 확인하세요.
-          with
-          [
-              _Ty=Obstacle
-          ]
-  
-  코드를 생성하고 있습니다...
   server.vcxproj -> C:\Users\somin\OneDrive\GameServer_TermProject\server\x64\Debug\server.exe
