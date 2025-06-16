@@ -15,7 +15,7 @@
 #include "..\..\server\server\game_header.h"
 using namespace std;
 
-bool make_id = false; 
+bool make_id = false;
 char id_buffer[MAX_ID_LENGTH] = "";      // 유저 ID 입력용
 int id_len = 0;
 
@@ -146,25 +146,16 @@ void process_packet(char* ptr)
 			player.name[MAX_ID_LENGTH - 1] = '\0';
 			player.can_see = true;
 		}
-		else if (packet->o_type == 1) { // PEACE MONSTER
+		else if (packet->o_type >= 1&&packet->o_type<=4) {
 			npcs[id].x = packet->x;
 			npcs[id].y = packet->y;
 			npcs[id].id = id;
 			strncpy_s(npcs[id].name, packet->name, MAX_ID_LENGTH);
 			npcs[id].name[MAX_ID_LENGTH - 1] = '\0';
 			npcs[id].can_see = true;
-			npcs[id].npc_type = 1;
+			npcs[id].npc_type = packet->o_type;
 		}
-		else if (packet->o_type == 2) { // AGRO MONSTER
-			npcs[id].x = packet->x;
-			npcs[id].y = packet->y;
-			npcs[id].id = id;
-			strncpy_s(npcs[id].name, packet->name, MAX_ID_LENGTH);
-			npcs[id].name[MAX_ID_LENGTH - 1] = '\0';
-			npcs[id].can_see = true;
-			npcs[id].npc_type = 2;
-		}
-		else if (packet->o_type == 3) { // 장애물!
+		else if (packet->o_type == 5) { // 장애물!
 			obstacles[id].id = id;
 			obstacles[id].x = packet->x;
 			obstacles[id].y = packet->y;
@@ -354,8 +345,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	return msg.wParam;
 }
 
-CImage Ninja, NinjaDark, NinjaRed, Background, Rock;
-CImage backBuffer;
+CImage Ninja, NinjaDark, NinjaRed, Skeleton, Spirit;
+CImage Background, Rock, backBuffer;
 HFONT hFont;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	HDC hDC, memDC;
@@ -368,6 +359,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		Ninja.Load(L"img/Ninja.png");
 		NinjaDark.Load(L"img/NinjaDark.png");
 		NinjaRed.Load(L"img/NinjaRed.png");
+		Skeleton.Load(L"img/Skeleton.png");
+		Spirit.Load(L"img/Spirit.png");
 		Background.Load(L"img/Grass2.png");
 		Rock.Load(L"img/Rock.png");
 
@@ -434,9 +427,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				else if (ch.npc_type == 2)
 					NinjaRed.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
 						(ch.dir - 1) * TILE_SIZE, ch.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+				else if (ch.npc_type == 3)
+					Skeleton.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
+						(ch.dir - 1) * TILE_SIZE, ch.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+				else if (ch.npc_type == 4)
+					Spirit.Draw(memDC, draw_x, draw_y, TILE_SIZE, TILE_SIZE,
+						(ch.dir - 1) * TILE_SIZE, ch.frame * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 
-				MultiByteToWideChar(CP_ACP, 0, ch.name, -1, szName, 32);
-				TextOut(memDC, draw_x, draw_y - 20, szName, wcslen(szName));
+				// MultiByteToWideChar(CP_ACP, 0, ch.name, -1, szName, 32);
+				// TextOut(memDC, draw_x, draw_y - 20, szName, wcslen(szName));
 			}
 
 			for (auto& obs : obstacles) {
@@ -530,7 +529,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					id_buffer[id_len] = '\0';
 					player.id = _atoi64(id_buffer);
 					logIn();
-				id_len = 0; id_buffer[0] = '\0';
+					id_len = 0; id_buffer[0] = '\0';
 				}
 			}
 			else if (id_len < MAX_ID_LENGTH - 1 && isprint((char)wParam)) {

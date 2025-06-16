@@ -131,7 +131,7 @@ void SESSION::send_add_player_packet(int target_id) {
 		if (!npcs.count(target_id)) return;
 		auto& n = npcs[target_id];
 		strncpy_s(packet.name, n->name.c_str(), MAX_ID_LENGTH);
-		packet.o_type = (n->npc_type == 1) ? 1 : 2;
+		packet.o_type = n->npc_type;
 		packet.x = n->x;
 		packet.y = n->y;
 	}
@@ -139,7 +139,7 @@ void SESSION::send_add_player_packet(int target_id) {
 		if (!obstacles.count(target_id)) return;
 		auto& n = obstacles[target_id];
 		strncpy_s(packet.name, "Rock", MAX_ID_LENGTH);
-		packet.o_type = 3; // Obstacle
+		packet.o_type = 5; // Obstacle
 		packet.x = n->x;
 		packet.y = n->y;
 		packet.rock_num = n->rock_num;

@@ -82,10 +82,13 @@ struct sc_packet_enter {
 	char type;
 	long long  id;
 	char name[MAX_ID_LENGTH];
-	char o_type;			// 0 : PLAYER
+	char o_type;			
+	// 0 : PLAYER
 	// 1 : PEACE MONSTER
 	// 2 : AGRO MONSTER
-	// 3 : Obstacle
+	// 3 : ROAMING PEACE MONSTER
+	// 4 : ROAMING AGRO MONSTER
+	// 5 : Obstacle
 	short x, y;
 	char rock_num;          // 장애물 종류
 };

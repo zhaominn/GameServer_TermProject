@@ -32,13 +32,12 @@ void InitializeObstacles() {
 	}
 }
 
-
 void InitializeNPC()
 {
 	cout << "NPC intialize begin.\n";
 	for (int i = 0; i < NUM_MONSTER; ++i) {
 		int npc_id = MAX_USER + i;
-		npcs[npc_id] = make_shared<NPC_SESSION>(npc_id, "NPC" + std::to_string(i));
+		npcs[npc_id] = make_shared<NPC_SESSION>(npc_id, "NPC" + std::to_string(i), i % 4 + 1);
 		sector_manager.add_object(npcs[npc_id]->id, npcs[npc_id]->x, npcs[npc_id]->y);
 	}
 	cout << "NPC initialize end.\n";
