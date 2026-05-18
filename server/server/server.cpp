@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "npc_session.h"
+#include "SESSION/npc_session.h"
 
 using namespace std;
 

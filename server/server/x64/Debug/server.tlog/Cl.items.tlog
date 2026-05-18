@@ -1,8 +1,8 @@
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\database_manager.cpp;C:\Users\somin\OneDrive\GameServer_TermProject\server\server\x64\Debug\database_manager.obj
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\npc_session.cpp;C:\Users\somin\OneDrive\GameServer_TermProject\server\server\x64\Debug\npc_session.obj
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\obstacle.cpp;C:\Users\somin\OneDrive\GameServer_TermProject\server\server\x64\Debug\obstacle.obj
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\pch.cpp;C:\Users\somin\OneDrive\GameServer_TermProject\server\server\x64\Debug\pch.obj
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\sector_manager.cpp;C:\Users\somin\OneDrive\GameServer_TermProject\server\server\x64\Debug\sector_manager.obj
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\server.cpp;C:\Users\somin\OneDrive\GameServer_TermProject\server\server\x64\Debug\server.obj
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\session.cpp;C:\Users\somin\OneDrive\GameServer_TermProject\server\server\x64\Debug\session.obj
-C:\Users\somin\OneDrive\GameServer_TermProject\server\server\tile_map.cpp;C:\Users\somin\OneDrive\GameServer_TermProject\server\server\x64\Debug\tile_map.obj
+C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\DB\database_manager.cpp;C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\x64\Debug\database_manager.obj
+C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\MAP\sector_manager.cpp;C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\x64\Debug\sector_manager.obj
+C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\MAP\tile_map.cpp;C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\x64\Debug\tile_map.obj
+C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\OBJECT\obstacle.cpp;C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\x64\Debug\obstacle.obj
+C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\pch.cpp;C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\x64\Debug\pch.obj
+C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\server.cpp;C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\x64\Debug\server.obj
+C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\SESSION\npc_session.cpp;C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\x64\Debug\npc_session.obj
+C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\SESSION\session.cpp;C:\Users\user\Documents\GitHub\GameServer_TermProject\server\server\x64\Debug\session.obj
